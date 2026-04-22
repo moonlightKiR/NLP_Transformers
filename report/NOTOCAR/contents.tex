@@ -1,0 +1,13 @@
+\newcounter{i}
+\setcounter{i}{1}
+\makeatletter
+\whiledo{\value{i} < 100}{ % Busca hasta el archivo 99.tex
+    \IfFileExists{content/\the\value{i}.tex}{
+        \input{content/\the\value{i}}
+        \newpage
+        \stepcounter{i}
+    }{
+        \setcounter{i}{101} % Se detiene si falta un número en la secuencia
+    }
+}
+\makeatother

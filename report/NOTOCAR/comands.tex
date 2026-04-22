@@ -1,0 +1,8 @@
+\newcommand{\conteoTotal}{%
+  \immediate\write18{texcount -1 -sum -merge content/*.tex > palabras.sum}%
+  \IfFileExists{palabras.sum}{%
+    c. \input{palabras.sum} words%
+  }{%
+    c. ?? words (habilitar shell-escape)%
+  }%
+}

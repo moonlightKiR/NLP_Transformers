@@ -1,0 +1,18 @@
+# Python caché files & folder
+*.pyc
+__pycache__/
+
+# Latex documentation
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.toc
+*.sum
+*.out
+*.bbl
+*.blg
+
+# Mac unknown directories
+.DS_Store
