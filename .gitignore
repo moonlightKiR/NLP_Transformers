@@ -1,6 +1,8 @@
 # Python caché files & folder
 *.pyc
 __pycache__/
+.mypy_cache/
+.ruff_cache/
 
 # Latex documentation
 *.aux
@@ -16,3 +18,12 @@ __pycache__/
 
 # Mac unknown directories
 .DS_Store
+
+# Unneeded folders
+statement/
+
+# Vscode folders
+.vscode/
+
+# Venv folder
+.venv/

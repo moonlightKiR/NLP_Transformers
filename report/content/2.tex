@@ -1,3 +1,24 @@
-\section{Selección}
-\subsection{Caso}
-\subsection{Modelo}
+\section{Selección del Caso de Uso y Dataset}
+
+\subsection{Caso de Uso: Generación de Respuestas en Diálogo}
+Para esta práctica, se ha seleccionado la tarea de \textbf{Generación de Respuestas en Diálogo}. Esta tarea consiste en desarrollar modelos capaces de procesar el historial de una conversación y generar una respuesta coherente, relevante y gramaticalmente correcta. Es un reto complejo que requiere que el modelo comprenda no solo el lenguaje, sino también el contexto y, en muchos casos, el objetivo del usuario dentro de un flujo conversacional.
+
+\subsection{Datasets Considerados}
+Durante la fase de investigación se evaluaron diversas fuentes de datos ampliamente utilizadas en la literatura científica para el entrenamiento de sistemas de diálogo:
+\begin{itemize}
+    \item \textbf{MultiWOZ}: Un estándar para sistemas orientados a tareas, aunque con un lenguaje a veces limitado por su estructura rígida.
+    \item \textbf{Persona-Chat}: Ideal para conversaciones de tipo \textit{chit-chat} con enfoque en la personalidad, pero menos orientado a la resolución de problemas técnicos o servicios.
+    \item \textbf{DailyDialog}: Interesante por sus anotaciones emocionales en charlas cotidianas.
+    \item \textbf{EmpatheticDialogues}: Enfocado en la generación de respuestas con carga empática.
+\end{itemize}
+
+\subsection{Dataset Seleccionado: SGD (Schema-Guided Dialogue)}
+Finalmente, se ha optado por utilizar el dataset \textbf{SGD (Schema-Guided Dialogue)} de Google. La elección se fundamenta en que representa el estado del arte actual para modelos multidominio. A diferencia de otros conjuntos de datos, SGD ofrece:
+\begin{itemize}
+    \item \textbf{Gran Escala}: Incluye más de 16,000 diálogos que cubren 20 dominios distintos (viajes, bancos, cine, clima, etc.).
+    \item \textbf{Capacidad de Generalización}: Su arquitectura basada en esquemas permite que el modelo aprenda a interactuar con servicios y APIs mediante descripciones en lenguaje natural.
+    \item \textbf{Desafío Técnico}: Exige una mayor gestión del contexto y del estado del diálogo que datasets previos, lo que lo hace ideal para poner a prueba la potencia de las arquitecturas Transformer seleccionadas.
+\end{itemize}
+
+\subsection{Modelos}
+[Pendiente de definir las dos arquitecturas específicas a comparar sobre este dataset].
