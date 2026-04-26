@@ -12,6 +12,7 @@ Este proyecto forma parte de la asignatura de Deep Learning y se centra en la ex
 - Language: Python 3.12+
 - Package Manager: uv
 - Models: Gemma 4 E2B-it, Qwen 3.5-9B (GGUF)
+- Hardware Acceleration: Apple Silicon MPS (Metal Performance Shaders)
 - Code Quality:
   - pre-commit: Hook automation.
   - ruff: Fast linting and formatting (PEP 8).
@@ -28,8 +29,8 @@ Este proyecto forma parte de la asignatura de Deep Learning y se centra en la ex
 │   ├── config.py         # General project configuration
 │   ├── constants.py      # Global project constants
 │   └── main.py           # Entry point (Orchestrator)
-├── .data/                # Local datasets (ignored by git, hidden)
-├── .models/              # Local GGUF models and tokenizers (ignored by git, hidden)
+├── .data/                # Local datasets and preprocessed tensors (ignored)
+├── .models/              # Local GGUF models and tokenizers (ignored)
 ├── report/               # LaTeX report and documentation
 │   └── app -> ../app     # Symlink to app for report listings
 ├── .pre-commit-config.yaml
@@ -49,11 +50,26 @@ Este proyecto forma parte de la asignatura de Deep Learning y se centra en la ex
    uv run pre-commit install
    ```
 
-3. Download and Preprocess Resources (Dataset and Models):
+3. Download and Preprocess Resources:
    ```bash
    uv run nlp-t
    ```
-   Note: Resources will be stored in .data/ and .models/ respectively. The system will automatically perform tokenization, truncation, and padding, saving the results as PyTorch tensors.
+   Note: The system will automatically:
+   - Fetch the SGD dataset and GGUF models.
+   - Setup local tokenizers for offline use.
+   - Perform bulk preprocessing (Tokenization, Truncation, Padding).
+   - Apply long sequence handling strategies.
+   - Save processed tensors as .pt files using Apple Silicon GPU acceleration.
+
+## Advanced Features
+
+### Hardware Optimization
+The pipeline is optimized for macOS (M1/M2/M3) using the MPS backend, offloading intensive tokenization and tensor operations to the GPU.
+
+### Long Sequence Handling
+To manage extensive dialogue histories, the system combines architectural strengths with data strategies:
+- Native Support: Utilization of Hybrid Attention (Gemma 4) and Gated Delta Networks (Qwen 3.5) for massive context windows.
+- Context Windowing: Automated turn-truncation in the preprocessing phase to prioritize the most recent and relevant conversational context.
 
 ## Code Standards
 The project follows strict typing and style rules. You can validate the code manually with:

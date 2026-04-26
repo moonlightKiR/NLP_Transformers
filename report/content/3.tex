@@ -8,44 +8,45 @@ Para garantizar la reproducibilidad y facilitar el despliegue del proyecto, se h
 La arquitectura se ha desacoplado para que cada dominio (datasets y modelos) gestione sus propios recursos:
 
 \begin{itemize}
-    \item \textbf{Gestión de Modelos (\texttt{.models/}):} Se ha centralizado la descarga de modelos en un directorio oculto en la raíz del proyecto, manteniendo la lógica desacoplada en \texttt{app/models/}.
+    \item \textbf{Gestión de Modelos (\texttt{.models/}):} Se ha centralizado la descarga de modelos en un directorio oculto en la raíz del proyecto. La lógica está encapsulada en \texttt{app/models/}, permitiendo descargar archivos GGUF y configuraciones de tokenizadores de forma independiente.
     
 \lstinputlisting[language=Python, firstline=3, lastline=19, caption=Lógica de descarga de modelos en app/models/downloader.py]{app/models/downloader.py}
 
-    \item \textbf{Gestión de Datasets (\texttt{app/dataset/})} Se encarga de la clonación del repositorio de datos mediante Git, manteniendo una interfaz abstracta para futuros cambios.
+    \item \textbf{Gestión de Datasets (\texttt{app/dataset/}):} Se encarga de la clonación del repositorio de datos mediante Git, manteniendo una interfaz abstracta para asegurar la integridad de los datos originales.
 
-    \item \textbf{Configuración Dinámica:} Se utilizan clases especializadas para calcular las rutas de forma robusta, asegurando que el proyecto funcione independientemente del directorio de ejecución.
+    \item \textbf{Conversores Especializados (\texttt{app/converters/}):} Módulos dedicados a la transformación de formatos, incluyendo la conversión de PDF a Markdown y el formateo de diálogos de SGD al formato estándar de mensajes (\textit{role/content}).
 \end{itemize}
 
 \subsubsection{Flujo de Ejecución}
 
-El punto de entrada principal coordina ambos servicios, inyectando los descargadores específicos para cada tipo de recurso.
+El punto de entrada principal coordina tres etapas secuenciales: Ingesta, Estructuración y Preprocesado.
 
-\lstinputlisting[language=Python, firstline=7, lastline=35, caption=Orquestación del setup y preprocesado en app/main.py]{app/main.py}
+\lstinputlisting[language=Python, firstline=9, lastline=53, caption=Orquestación del setup completo en app/main.py]{app/main.py}
 
-Este enfoque modular permite que, por ejemplo, el sistema de descarga de modelos pueda ser modificado o testeado sin afectar a la lógica de gestión de los datasets.
+\subsection{Estructuración de Diálogos (JSON Chat Format)}
 
-\subsection{Tokenización}
+Antes de la tokenización, se ha introducido una fase de \textbf{Estructuración}. Los archivos originales del dataset SGD son complejos y contienen metadatos no necesarios para el entrenamiento directo. Se transforman a un formato de JSON simplificado donde cada diálogo es una lista de mensajes con roles \texttt{user} y \texttt{assistant}. Estos archivos se almacenan en \texttt{.data/structured/}, creando un formato intermedio universal.
 
-La tokenización es el proceso de convertir el texto plano en secuencias de números (\textit{tokens}) que el modelo puede procesar. Dado que cada arquitectura (Gemma y Qwen) utiliza su propio vocabulario, se ha implementado un servicio desacoplado que encapsula la lógica de los tokenizadores. Para maximizar el rendimiento en hardware Apple Silicon, el proceso se ejecuta utilizando el backend \texttt{MPS} (Metal Performance Shaders), moviendo los tensores resultantes directamente a la GPU del dispositivo.
+\lstinputlisting[language=Python, firstline=1, lastline=25, caption=Conversor de formato de diálogo en app/converters/dialogue\_format.py]{app/converters/dialogue_format.py}
 
-\begin{itemize}
-    \item \textbf{Gemma:} Utiliza un tokenizador basado en \textit{Byte-Pair Encoding} (BPE).
-    \item \textbf{Qwen:} Utiliza un esquema optimizado para múltiples lenguajes.
-\end{itemize}
+\subsection{Tokenización y Chat Templates}
 
-\lstinputlisting[language=Python, firstline=36, lastline=50, caption=Servicio de Preprocesado en app/dataset/processor.py]{app/dataset/processor.py}
+La tokenización convierte el texto en secuencias numéricas. Dado que se utilizan modelos \textit{Instruct}, el preprocesado aplica \textbf{Chat Templates} de Hugging Face. Este paso inyecta tokens de control específicos (como \texttt{<|im\_start|>} para Qwen o \texttt{<start\_of\_turn>} para Gemma) para que el modelo reconozca la estructura de la conversación.
 
-\subsection{Truncado}
+Para maximizar el rendimiento en hardware Apple Silicon, el proceso se ejecuta utilizando el backend \texttt{MPS} (Metal Performance Shaders), moviendo los tensores resultantes directamente a la GPU del dispositivo.
 
-Para manejar las limitaciones de memoria y la longitud máxima de contexto de los modelos, se aplica una estrategia de truncado. Las secuencias que exceden la longitud máxima definida (512 tokens) se cortan para asegurar que los tensores resultantes tengan dimensiones compatibles con la arquitectura del Transformer seleccionado.
+\lstinputlisting[language=Python, firstline=46, lastline=67, caption=Inyección de Chat Templates y uso de MPS en app/dataset/processor.py]{app/dataset/processor.py}
 
-\subsection{Padding}
+\subsection{Truncado y Padding}
 
-Dado que los modelos de Deep Learning requieren procesar datos en lotes (\textit{batches}) de tamaño uniforme, se aplica \textit{padding} a las secuencias más cortas. Se añaden tokens especiales hasta alcanzar la longitud máxima predefinida, permitiendo la creación de tensores rectangulares eficientes. El sistema guarda estos tensores en formato \texttt{.pt} dentro de la carpeta \texttt{.data/preprocessed/}, evitando repetir el proceso en ejecuciones futuras.
+Se aplica una estrategia de truncado para asegurar que ninguna secuencia exceda los 512 tokens. Complementariamente, se utiliza \textit{padding} para uniformizar el tamaño de los lotes, permitiendo la creación de tensores rectangulares eficientes para el entrenamiento.
 
-\lstinputlisting[language=Python, firstline=52, lastline=107, caption=Lógica del PreprocessingService en app/dataset/processor.py]{app/dataset/processor.py}
+\subsection{Persistencia de Tensores}
+
+El sistema guarda los resultados finales como archivos de tensores de PyTorch (\texttt{.pt}) dentro de \texttt{.data/preprocessed/}, organizados por modelo y partición (\texttt{train} y \texttt{test}). Se ha implementado una lógica de comprobación que evita repetir el procesado si los archivos ya existen.
+
+\lstinputlisting[language=Python, firstline=98, lastline=138, caption=Gestión de persistencia por particiones en app/dataset/processor.py]{app/dataset/processor.py}
 
 \subsection{Manejo Secuencias Largas}
 
-Para el manejo de secuencias extremadamente largas en diálogos complejos, se han considerado estrategias como el truncado inteligente, priorizando los turnos más recientes de la conversación para preservar el contexto inmediato del diálogo.
+Se han seleccionado modelos con soluciones nativas para contextos extensos (Atención Híbrida en Gemma 4 y GDN en Qwen 3.5). Además, se ha implementado una \textbf{ventana de contexto} que limita el procesamiento a los $N$ turnos más recientes del diálogo, preservando la información crítica para la generación de la respuesta.

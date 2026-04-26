@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from app.constants import DATASET_DIR_NAME
+from app.constants import (
+    DATASET_DIR_NAME,
+    TEST_SPLIT_STRUCTURED_DIR,
+    TRAIN_SPLIT_STRUCTURED_DIR,
+)
 
 
 class AppConfig:
@@ -23,9 +27,25 @@ class AppConfig:
         return self.project_root / ".data" / "manifest.json"
 
     @property
+    def structured_path(self) -> Path:
+        """Returns the directory
+        where structured JSON dialogues will be stored."""
+        return self.project_root / ".data" / "structured"
+
+    @property
     def preprocessed_path(self) -> Path:
         """Returns the directory where tokenized tensors will be stored."""
         return self.project_root / ".data" / "preprocessed"
+
+    @property
+    def train_raw_path(self) -> Path:
+        """Returns the raw training data path."""
+        return self.dataset_path / TRAIN_SPLIT_STRUCTURED_DIR
+
+    @property
+    def test_raw_path(self) -> Path:
+        """Returns the raw test data path."""
+        return self.dataset_path / TEST_SPLIT_STRUCTURED_DIR
 
 
 # Global configuration instance
