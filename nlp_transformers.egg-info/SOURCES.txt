@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+app/__init__.py
+app/config.py
+app/constants.py
+app/main.py
+app/dataset/__init__.py
+app/dataset/downloader.py
+app/models/__init__.py
+nlp_transformers.egg-info/PKG-INFO
+nlp_transformers.egg-info/SOURCES.txt
+nlp_transformers.egg-info/dependency_links.txt
+nlp_transformers.egg-info/entry_points.txt
+nlp_transformers.egg-info/requires.txt
+nlp_transformers.egg-info/top_level.txt

@@ -27,3 +27,10 @@ statement/
 
 # Venv folder
 .venv/
+
+# Models to ignore 
+*.gguf
+
+# Dataset and model folders
+.data/
+.models/

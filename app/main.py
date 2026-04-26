@@ -1,18 +1,38 @@
 from app.config import settings
 from app.constants import SGD_REPO_URL
 from app.dataset.downloader import DatasetService, GitDownloader
+from app.models.config import model_settings
+from app.models.constants import GEMMA_MODEL_URL, QWEN_MODEL_URL
+from app.models.downloader import ModelDownloader, ModelService
 
 
-def main() -> None:
-    """Punto de entrada principal del sistema."""
+def main():
+    """Main entry point for the application."""
 
-    # Inyección de dependencias y configuración (SOLID)
-    downloader = GitDownloader()
-    service = DatasetService(downloader=downloader)
+    # 1. Dataset Setup
+    git_downloader = GitDownloader()
+    dataset_service = DatasetService(git_downloader)
 
-    # Ejecución utilizando la configuración centralizada (Clean Code)
     print("=== NLP Transformers: Dataset Setup ===")
-    service.setup_dataset(url=SGD_REPO_URL, target_path=settings.dataset_path)
+    dataset_service.setup_dataset(
+        url=SGD_REPO_URL, target_path=settings.dataset_path
+    )
+
+    # 2. Models Setup
+    model_downloader = ModelDownloader()
+    model_service = ModelService(model_downloader)
+
+    print("\n=== NLP Transformers: Models Setup ===")
+
+    # Setup Gemma
+    model_service.setup_model(
+        url=GEMMA_MODEL_URL, target_dir=model_settings.models_dir
+    )
+
+    # Setup Qwen
+    model_service.setup_model(
+        url=QWEN_MODEL_URL, target_dir=model_settings.models_dir
+    )
 
 
 if __name__ == "__main__":

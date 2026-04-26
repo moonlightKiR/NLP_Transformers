@@ -1,45 +1,48 @@
 import subprocess
 from abc import ABC, abstractmethod
-from pathlib import Path
 
 
 class Downloader(ABC):
-    """Interfaz abstracta para descargadores de datos."""
+    """Abstract interface for data downloaders."""
 
     @abstractmethod
-    def download(self, source: str, destination: Path) -> None:
+    def download(self, source, destination):
         pass
 
 
 class GitDownloader(Downloader):
-    """Implementación de descarga mediante Git."""
+    """Git-based implementation for downloading repositories."""
 
-    def download(self, source: str, destination: Path) -> None:
-        if destination.exists():
-            print(f"[-] El repositorio ya existe en: {destination}")
+    def download(self, source, destination):
+        if destination.exists() and any(destination.iterdir()):
+            print(
+                f"[-] Dataset already exists at: {destination}. \
+                    Skipping download."
+            )
             return
 
-        print(f"[+] Clonando desde {source}...")
-        result = subprocess.run(
-            ["git", "clone", source, str(destination)],
-            capture_output=True,
-            text=True,
-        )
-
-        if result.returncode != 0:
-            raise RuntimeError(f"Error en git clone: {result.stderr}")
-
-        print(f"[+] Descarga completada en: {destination}")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        print(f"[+] Downloading dataset from {source}...")
+        try:
+            subprocess.run(
+                ["git", "clone", source, str(destination)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            print(f"[+] Download completed successfully at: {destination}")
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to clone repository: {e.stderr}")
 
 
 class DatasetService:
-    """Servicio de alto nivel para gestionar datasets."""
+    """High-level service to manage datasets."""
 
-    def __init__(self, downloader: Downloader):
+    def __init__(self, downloader):
         self._downloader = downloader
 
-    def setup_dataset(self, url: str, target_path: Path) -> None:
+    def setup_dataset(self, url, target_path):
         try:
             self._downloader.download(url, target_path)
         except Exception as e:
-            print(f"[!] Fallo en el servicio de dataset: {e}")
+            print(f"[!] Critical error in dataset service: {e}")

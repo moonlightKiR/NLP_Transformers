@@ -4,19 +4,25 @@ from app.constants import DATASET_DIR_NAME
 
 
 class AppConfig:
-    """Gestiona la configuración dinámica y rutas del proyecto."""
+    """Manages dynamic project configuration and paths."""
 
     @property
     def project_root(self) -> Path:
-        """Retorna la ruta raíz del proyecto."""
-        # .parent.parent.parent sube de app/ a la raíz
-        return Path(__file__).resolve().parent.parent.parent
+        """Returns the project root directory."""
+        return Path(__file__).resolve().parent.parent
 
     @property
     def dataset_path(self) -> Path:
-        """Retorna la ruta completa donde se alojará el dataset."""
-        return self.project_root / DATASET_DIR_NAME
+        """Returns the path inside a '.data'
+        folder in the root directory."""
+        return self.project_root / ".data" / DATASET_DIR_NAME
+
+    @property
+    def manifest_path(self) -> Path:
+        """Returns the path for the integrity manifest
+        file in the .data/ directory."""
+        return self.project_root / ".data" / "manifest.json"
 
 
-# Instancia global de configuración (Singleton pattern sugerido)
+# Global configuration instance
 settings = AppConfig()

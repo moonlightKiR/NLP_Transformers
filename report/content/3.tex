@@ -1,4 +1,30 @@
 \section{Preprocesado}
+\subsection{Descarga de datos y modelos}
+
+Para garantizar la reproducibilidad y facilitar el despliegue del proyecto, se ha implementado un sistema automatizado de gestión de recursos siguiendo principios de diseño \texttt{SOLID} y \texttt{Clean Code}. Este sistema se encarga de la descarga y organización tanto del dataset como de los modelos de lenguaje.
+
+\subsubsection{Arquitectura del Sistema de Ingestión}
+
+La arquitectura se ha desacoplado para que cada dominio (datasets y modelos) gestione sus propios recursos:
+
+\begin{itemize}
+    \item \textbf{Gestión de Modelos (\texttt{.models/}):} Se ha centralizado la descarga de modelos en un directorio oculto en la raíz del proyecto, manteniendo la lógica desacoplada en \texttt{app/models/}.
+    
+\lstinputlisting[language=Python, firstline=3, lastline=19, caption=Lógica de descarga de modelos en app/models/downloader.py]{app/models/downloader.py}
+
+    \item \textbf{Gestión de Datasets (\texttt{app/dataset/}):} Se encarga de la clonación del repositorio de datos mediante Git, manteniendo una interfaz abstracta para futuros cambios.
+
+    \item \textbf{Configuración Dinámica:} Se utilizan clases especializadas para calcular las rutas de forma robusta, asegurando que el proyecto funcione independientemente del directorio de ejecución.
+\end{itemize}
+
+\subsubsection{Flujo de Ejecución}
+
+El punto de entrada principal coordina ambos servicios, inyectando los descargadores específicos para cada tipo de recurso.
+
+\lstinputlisting[language=Python, firstline=7, lastline=35, caption=Orquestación del setup en app/main.py]{app/main.py}
+
+Este enfoque modular permite que, por ejemplo, el sistema de descarga de modelos pueda ser modificado o testeado sin afectar a la lógica de gestión de los datasets.
+
 \subsection{Tokenización}
 \subsection{Truncado}
 \subsection{Padding}

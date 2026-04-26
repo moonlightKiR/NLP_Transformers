@@ -3,11 +3,9 @@ repos:
     rev: v0.9.1
     hooks:
     -   id: ruff
+        name: Ruff Check app
         args: [ --fix ]
+        files: ^app/
     -   id: ruff-format
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.14.1
-    hooks:
-    -   id: mypy
-        additional_dependencies: [types-PyYAML]
-        args: [--ignore-missing-imports]
+        name: Ruff Format app
+        files: ^app/

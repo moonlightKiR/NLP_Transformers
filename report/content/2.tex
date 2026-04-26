@@ -21,4 +21,20 @@ Finalmente, se ha optado por utilizar el dataset \textbf{SGD (Schema-Guided Dial
 \end{itemize}
 
 \subsection{Modelos}
-[Pendiente de definir las dos arquitecturas específicas a comparar sobre este dataset].
+Para cumplir con el requerimiento de comparar dos arquitecturas de Transformers distintas, se han seleccionado los siguientes modelos de última generación en formato \texttt{GGUF}, gestionados localmente en \texttt{app/models/}:
+
+\begin{itemize}
+    \item \textbf{Gemma 4 E2B-it (Google DeepMind):} Versión de 2 billones de parámetros efectivos optimizada para instrucciones. Utiliza una arquitectura de \textbf{Atención Híbrida} (global y \textit{sliding-window}).
+    \begin{itemize}
+        \item \textit{Source:} \href{https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF}{unsloth/gemma-4-E2B-it-GGUF}
+        \item \textit{Archivo:} \texttt{gemma-4-E2B-it-Q3\_K\_M.gguf}
+    \end{itemize}
+    
+    \item \textbf{Qwen 3.5-9B (Alibaba Qwen):} Modelo de 9 billones de parámetros basado en \textbf{Gated Delta Networks (GDN)} y \textbf{Mixture-of-Experts (MoE)}, permitiendo un manejo de contexto masivo con alta eficiencia.
+    \begin{itemize}
+        \item \textit{Source:} \href{https://huggingface.co/unsloth/Qwen3.5-9B-GGUF}{unsloth/Qwen3.5-9B-GGUF}
+        \item \textit{Archivo:} \texttt{Qwen3.5-9B-Q3\_K\_M.gguf}
+    \end{itemize}
+\end{itemize}
+
+Esta selección permite contrastar una arquitectura de atención híbrida frente a una de atención lineal con MoE, proporcionando un marco comparativo ideal para evaluar rendimiento y eficiencia en la generación de diálogos.

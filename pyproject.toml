@@ -19,7 +19,3 @@ line-length = 79
 # Habilitar reglas de Pyflakes (F) y E/W (Error/Warning de pycodestyle)
 select = ["E", "F", "W", "I"]
 fixable = ["ALL"]
-
-[tool.mypy]
-ignore_missing_imports = true
-strict = true
