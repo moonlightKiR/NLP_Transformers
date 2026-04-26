@@ -7,6 +7,7 @@ app/constants.py
 app/main.py
 app/dataset/__init__.py
 app/dataset/downloader.py
+app/dataset/processor.py
 app/models/__init__.py
 app/models/config.py
 app/models/constants.py

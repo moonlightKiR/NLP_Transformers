@@ -12,7 +12,7 @@ La arquitectura se ha desacoplado para que cada dominio (datasets y modelos) ges
     
 \lstinputlisting[language=Python, firstline=3, lastline=19, caption=Lógica de descarga de modelos en app/models/downloader.py]{app/models/downloader.py}
 
-    \item \textbf{Gestión de Datasets (\texttt{app/dataset/}):} Se encarga de la clonación del repositorio de datos mediante Git, manteniendo una interfaz abstracta para futuros cambios.
+    \item \textbf{Gestión de Datasets (\texttt{app/dataset/})} Se encarga de la clonación del repositorio de datos mediante Git, manteniendo una interfaz abstracta para futuros cambios.
 
     \item \textbf{Configuración Dinámica:} Se utilizan clases especializadas para calcular las rutas de forma robusta, asegurando que el proyecto funcione independientemente del directorio de ejecución.
 \end{itemize}
@@ -21,11 +21,31 @@ La arquitectura se ha desacoplado para que cada dominio (datasets y modelos) ges
 
 El punto de entrada principal coordina ambos servicios, inyectando los descargadores específicos para cada tipo de recurso.
 
-\lstinputlisting[language=Python, firstline=7, lastline=35, caption=Orquestación del setup en app/main.py]{app/main.py}
+\lstinputlisting[language=Python, firstline=7, lastline=35, caption=Orquestación del setup y preprocesado en app/main.py]{app/main.py}
 
 Este enfoque modular permite que, por ejemplo, el sistema de descarga de modelos pueda ser modificado o testeado sin afectar a la lógica de gestión de los datasets.
 
 \subsection{Tokenización}
+
+La tokenización es el proceso de convertir el texto plano en secuencias de números (\textit{tokens}) que el modelo puede procesar. Dado que cada arquitectura (Gemma y Qwen) utiliza su propio vocabulario, se ha implementado un servicio desacoplado que encapsula la lógica de los tokenizadores. Para maximizar el rendimiento en hardware Apple Silicon, el proceso se ejecuta utilizando el backend \texttt{MPS} (Metal Performance Shaders), moviendo los tensores resultantes directamente a la GPU del dispositivo.
+
+\begin{itemize}
+    \item \textbf{Gemma:} Utiliza un tokenizador basado en \textit{Byte-Pair Encoding} (BPE).
+    \item \textbf{Qwen:} Utiliza un esquema optimizado para múltiples lenguajes.
+\end{itemize}
+
+\lstinputlisting[language=Python, firstline=36, lastline=50, caption=Servicio de Preprocesado en app/dataset/processor.py]{app/dataset/processor.py}
+
 \subsection{Truncado}
+
+Para manejar las limitaciones de memoria y la longitud máxima de contexto de los modelos, se aplica una estrategia de truncado. Las secuencias que exceden la longitud máxima definida (512 tokens) se cortan para asegurar que los tensores resultantes tengan dimensiones compatibles con la arquitectura del Transformer seleccionado.
+
 \subsection{Padding}
+
+Dado que los modelos de Deep Learning requieren procesar datos en lotes (\textit{batches}) de tamaño uniforme, se aplica \textit{padding} a las secuencias más cortas. Se añaden tokens especiales hasta alcanzar la longitud máxima predefinida, permitiendo la creación de tensores rectangulares eficientes. El sistema guarda estos tensores en formato \texttt{.pt} dentro de la carpeta \texttt{.data/preprocessed/}, evitando repetir el proceso en ejecuciones futuras.
+
+\lstinputlisting[language=Python, firstline=52, lastline=107, caption=Lógica del PreprocessingService en app/dataset/processor.py]{app/dataset/processor.py}
+
 \subsection{Manejo Secuencias Largas}
+
+Para el manejo de secuencias extremadamente largas en diálogos complejos, se han considerado estrategias como el truncado inteligente, priorizando los turnos más recientes de la conversación para preservar el contexto inmediato del diálogo.
