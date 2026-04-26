@@ -1,14 +1,11 @@
 repos:
-- repo: local
-  hooks:
-    - id: ruff-fix
-      name: Ruff Auto-Fix app
-      language: python
-      pass_filenames: false
-      entry: uv run ruff format app
-    - id: ruff-check
-      name: Ruff Check Format app
-      language: python
-      pass_filenames: false
-      entry: uv run ruff check app
- 
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.1
+    hooks:
+    -   id: ruff
+        name: Ruff Check app
+        args: [ --fix ]
+        files: ^app/
+    -   id: ruff-format
+        name: Ruff Format app
+        files: ^app/

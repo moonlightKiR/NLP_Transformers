@@ -1,31 +1,29 @@
 \section{Preprocesado}
-\subsection{Descarga de datos}
+\subsection{Descarga de datos y modelos}
 
-Para garantizar la reproducibilidad y facilitar el despliegue del proyecto, se ha implementado un sistema automatizado de gestión de datos siguiendo principios de diseño \texttt{SOLID} y \texttt{Clean Code}. Este sistema se encarga de la descarga, organización y verificación de integridad del dataset \textit{DSTC8 Schema-Guided Dialogue}.
+Para garantizar la reproducibilidad y facilitar el despliegue del proyecto, se ha implementado un sistema automatizado de gestión de recursos siguiendo principios de diseño \texttt{SOLID} y \texttt{Clean Code}. Este sistema se encarga de la descarga y organización tanto del dataset como de los modelos de lenguaje.
 
 \subsubsection{Arquitectura del Sistema de Ingestión}
 
-La arquitectura se divide en varios componentes desacoplados:
+La arquitectura se ha desacoplado para que cada dominio (datasets y modelos) gestione sus propios recursos:
 
 \begin{itemize}
-    \item \textbf{Configuración Centralizada:} Se utiliza una clase \texttt{AppConfig} para gestionar dinámicamente las rutas del proyecto.
+    \item \textbf{Gestión de Modelos (\texttt{.models/}):} Se ha centralizado la descarga de modelos en un directorio oculto en la raíz del proyecto, manteniendo la lógica desacoplada en \texttt{app/models/}.
     
-\lstinputlisting[language=Python, firstline=8, lastline=21, caption=Gestión de rutas en app/config.py]{app/config.py}
+\lstinputlisting[language=Python, firstline=3, lastline=19, caption=Lógica de descarga de modelos en app/models/downloader.py]{app/models/downloader.py}
 
-    \item \textbf{Servicio de Descarga (\texttt{GitDownloader}):} Implementa una interfaz abstracta \texttt{Downloader}, permitiendo cambiar el método de descarga. Actualmente utiliza \texttt{git clone} mediante \texttt{subprocess}.
-    
-\lstinputlisting[language=Python, firstline=52, lastline=71, caption=Implementación de GitDownloader en app/dataset/downloader.py]{app/dataset/downloader.py}
+    \item \textbf{Gestión de Datasets (\texttt{app/dataset/}):} Se encarga de la clonación del repositorio de datos mediante Git, manteniendo una interfaz abstracta para futuros cambios.
 
-    \item \textbf{Verificador de Integridad (\texttt{IntegrityVerifier}):} Asegura que los datos no hayan sido corrompidos mediante el uso de hashes \texttt{MD5} almacenados en un archivo \texttt{manifest.json}.
-    
-    \item \textbf{Orquestador (\texttt{DatasetService}):} Coordina el flujo de trabajo completo desde la descarga hasta la validación.
+    \item \textbf{Configuración Dinámica:} Se utilizan clases especializadas para calcular las rutas de forma robusta, asegurando que el proyecto funcione independientemente del directorio de ejecución.
 \end{itemize}
 
 \subsubsection{Flujo de Ejecución}
 
-Al iniciar la aplicación a través de \texttt{app/main.py}, se inyectan las dependencias necesarias en el \texttt{DatasetService}. El flujo asegura que todos los colaboradores trabajen exactamente con los mismos datos.
+El punto de entrada principal coordina ambos servicios, inyectando los descargadores específicos para cada tipo de recurso.
 
-\lstinputlisting[language=Python, firstline=7, lastline=23, caption=Orquestación del setup en app/main.py]{app/main.py}
+\lstinputlisting[language=Python, firstline=7, lastline=35, caption=Orquestación del setup en app/main.py]{app/main.py}
+
+Este enfoque modular permite que, por ejemplo, el sistema de descarga de modelos pueda ser modificado o testeado sin afectar a la lógica de gestión de los datasets.
 
 \subsection{Tokenización}
 \subsection{Truncado}
