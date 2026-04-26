@@ -3,6 +3,7 @@
 __pycache__/
 .mypy_cache/
 .ruff_cache/
+nlp_transformers.egg-info/
 
 # Latex documentation
 *.aux
@@ -27,3 +28,9 @@ statement/
 
 # Venv folder
 .venv/
+
+# Dataset download data
+.data/
+
+# Models not to upload
+*.gguf

@@ -2,6 +2,7 @@
 name = "nlp-transformers"
 version = "0.1.0"
 description = "Práctica 2 - Transformers en NLP"
+requires-python = ">=3.12"
 maintainers = [
   { name = "Guillem Gonzalo", email = "guillemgonzalo2001@gmail.com" }
 ]
@@ -11,12 +12,19 @@ dependencies = [
     "ruff>=0.15.12",
 ]
 
+[project.scripts]
+nlp-t = "app.main:main"
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [tool.ruff]
-# Longitud de línea de 79 caracteres (PEP 8)
 line-length = 79
 
 [tool.ruff.lint]
-# Habilitar reglas de Pyflakes (F) y E/W (Error/Warning de pycodestyle)
 select = ["E", "F", "W", "I"]
 fixable = ["ALL"]
 
