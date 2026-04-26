@@ -4,29 +4,34 @@ Este proyecto forma parte de la asignatura de Deep Learning y se centra en la ex
 
 ## 🎯 Objectives
 - Implement and fine-tune Transformer models for **Dialogue Response Generation**.
-- Perform a comparative evaluation between **Decoder-only** (Qwen3) and **Encoder-Decoder** (mT5) architectures.
+- Perform a comparative evaluation between **Gemma 4 E2B-it** and **Qwen 3.5-9B** architectures.
 - Use the **SGD (Schema-Guided Dialogue)** dataset from Google.
 - Apply software engineering principles (**SOLID**, **Clean Code**).
 
 ## 🛠️ Tech Stack
 - **Language:** Python 3.12+
 - **Package Manager:** `uv`
-- **Models:** Qwen3-1.5B, mT5-base
+- **Models:** Gemma 4 E2B-it, Qwen 3.5-9B (GGUF)
 - **Code Quality:**
   - `pre-commit`: Hook automation.
   - `ruff`: Fast linting and formatting (PEP 8).
-  - `mypy`: Static type checking.
 
 ## 📁 Project Structure
 ```text
 ├── app/
 │   ├── dataset/          # Data downloading and processing logic
-│   ├── models/           # Local GGUF models (Gemma 4, Qwen 3.5)
-│   ├── config.py         # Dynamic configuration and path management
+│   ├── models/           # Models logic, constants and config
+│   │   ├── config.py
+│   │   ├── constants.py
+│   │   ├── downloader.py
+│   │   └── __init__.py
+│   ├── config.py         # General project configuration
 │   ├── constants.py      # Global project constants
 │   └── main.py           # Entry point (Orchestrator)
 ├── .data/                # Local datasets (ignored by git, hidden)
+├── .models/              # Local GGUF models (ignored by git, hidden)
 ├── report/               # LaTeX report and documentation
+│   └── app -> ../app     # Symlink to app for report listings
 ├── .pre-commit-config.yaml
 ├── pyproject.toml        # Dependencies and tool configuration
 └── README.md
@@ -44,11 +49,11 @@ Este proyecto forma parte de la asignatura de Deep Learning y se centra en la ex
    uv run pre-commit install
    ```
 
-3. **Download the Dataset (SGD):**
+3. **Download Resources (Dataset and Models):**
    ```bash
    uv run nlp-t
    ```
-   *Note: The dataset will be downloaded into the `./.data/` directory.*
+   *Note: Resources will be stored in `.data/` and `.models/` respectively.*
 
 ## 📝 Code Standards
 The project follows strict typing and style rules. You can validate the code manually with:

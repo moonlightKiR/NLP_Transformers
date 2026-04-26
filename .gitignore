@@ -1,7 +1,6 @@
 # Python caché files & folder
 *.pyc
 __pycache__/
-.mypy_cache/
 .ruff_cache/
 nlp_transformers.egg-info/
 
@@ -16,6 +15,7 @@ nlp_transformers.egg-info/
 *.out
 *.bbl
 *.blg
+*.pdf
 
 # Mac unknown directories
 .DS_Store
@@ -29,8 +29,9 @@ statement/
 # Venv folder
 .venv/
 
-# Dataset download data
-.data/
-
-# Models not to upload
+# Models to ignore 
 *.gguf
+
+# Dataset and model folders
+.data/
+.models/

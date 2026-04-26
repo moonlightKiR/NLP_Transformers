@@ -21,13 +21,13 @@ Finalmente, se ha optado por utilizar el dataset \textbf{SGD (Schema-Guided Dial
 \end{itemize}
 
 \subsection{Modelos}
-Para cumplir con el requerimiento de comparar dos arquitecturas de Transformers distintas, se han seleccionado los siguientes modelos de última generación en formato \texttt{GGUF}, los cuales se gestionan localmente en el directorio \texttt{app/models/}:
+Para cumplir con el requerimiento de comparar dos arquitecturas de Transformers distintas, se han seleccionado los siguientes modelos de última generación en formato \texttt{GGUF}, gestionados localmente en \texttt{app/models/}:
 
 \begin{itemize}
-    \item \textbf{Gemma 4 E4B-it (Google DeepMind):} Versión de 4 billones de parámetros efectivos optimizada para instrucciones. Utiliza una arquitectura de \textbf{Atención Híbrida} (global y \textit{sliding-window}).
+    \item \textbf{Gemma 4 E2B-it (Google DeepMind):} Versión de 2 billones de parámetros efectivos optimizada para instrucciones. Utiliza una arquitectura de \textbf{Atención Híbrida} (global y \textit{sliding-window}).
     \begin{itemize}
-        \item \textit{Source:} \href{https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF}{unsloth/gemma-4-E4B-it-GGUF}
-        \item \textit{Archivo:} \texttt{gemma-4-E4B-it-Q3\_K\_M.gguf}
+        \item \textit{Source:} \href{https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF}{unsloth/gemma-4-E2B-it-GGUF}
+        \item \textit{Archivo:} \texttt{gemma-4-E2B-it-Q3\_K\_M.gguf}
     \end{itemize}
     
     \item \textbf{Qwen 3.5-9B (Alibaba Qwen):} Modelo de 9 billones de parámetros basado en \textbf{Gated Delta Networks (GDN)} y \textbf{Mixture-of-Experts (MoE)}, permitiendo un manejo de contexto masivo con alta eficiencia.

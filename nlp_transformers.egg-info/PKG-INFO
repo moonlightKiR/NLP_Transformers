@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: nlp-transformers
+Version: 0.1.0
+Summary: Práctica 2 - Transformers en NLP
+Maintainer-email: Guillem Gonzalo <guillemgonzalo2001@gmail.com>
+Requires-Python: >=3.12
+License-File: LICENSE
+Requires-Dist: pre-commit>=4.6.0
+Requires-Dist: ty>=0.0.32
+Requires-Dist: ruff>=0.15.12
+Dynamic: license-file
