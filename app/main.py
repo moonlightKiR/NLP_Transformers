@@ -1,18 +1,29 @@
 from app.config import settings
 from app.constants import SGD_REPO_URL
-from app.dataset.downloader import DatasetService, GitDownloader
+from app.dataset.downloader import (
+    DatasetService,
+    GitDownloader,
+    IntegrityVerifier,
+)
 
 
 def main() -> None:
-    """Punto de entrada principal del sistema."""
+    """Main entry point for the application."""
 
-    # Inyección de dependencias y configuración (SOLID)
+    # Dependency injection and configuration (SOLID)
     downloader = GitDownloader()
-    service = DatasetService(downloader=downloader)
+    verifier = IntegrityVerifier()
 
-    # Ejecución utilizando la configuración centralizada (Clean Code)
+    # The service now receives both the downloader and the integrity verifier
+    service = DatasetService(downloader=downloader, verifier=verifier)
+
+    # Execution using centralized configuration (Clean Code)
     print("=== NLP Transformers: Dataset Setup ===")
-    service.setup_dataset(url=SGD_REPO_URL, target_path=settings.dataset_path)
+    service.setup_dataset(
+        url=SGD_REPO_URL,
+        target_path=settings.dataset_path,
+        manifest_path=settings.manifest_path,
+    )
 
 
 if __name__ == "__main__":

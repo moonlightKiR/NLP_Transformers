@@ -1,4 +1,32 @@
 \section{Preprocesado}
+\subsection{Descarga de datos}
+
+Para garantizar la reproducibilidad y facilitar el despliegue del proyecto, se ha implementado un sistema automatizado de gestión de datos siguiendo principios de diseño \texttt{SOLID} y \texttt{Clean Code}. Este sistema se encarga de la descarga, organización y verificación de integridad del dataset \textit{DSTC8 Schema-Guided Dialogue}.
+
+\subsubsection{Arquitectura del Sistema de Ingestión}
+
+La arquitectura se divide en varios componentes desacoplados:
+
+\begin{itemize}
+    \item \textbf{Configuración Centralizada:} Se utiliza una clase \texttt{AppConfig} para gestionar dinámicamente las rutas del proyecto.
+    
+\lstinputlisting[language=Python, firstline=8, lastline=21, caption=Gestión de rutas en app/config.py]{app/config.py}
+
+    \item \textbf{Servicio de Descarga (\texttt{GitDownloader}):} Implementa una interfaz abstracta \texttt{Downloader}, permitiendo cambiar el método de descarga. Actualmente utiliza \texttt{git clone} mediante \texttt{subprocess}.
+    
+\lstinputlisting[language=Python, firstline=52, lastline=71, caption=Implementación de GitDownloader en app/dataset/downloader.py]{app/dataset/downloader.py}
+
+    \item \textbf{Verificador de Integridad (\texttt{IntegrityVerifier}):} Asegura que los datos no hayan sido corrompidos mediante el uso de hashes \texttt{MD5} almacenados en un archivo \texttt{manifest.json}.
+    
+    \item \textbf{Orquestador (\texttt{DatasetService}):} Coordina el flujo de trabajo completo desde la descarga hasta la validación.
+\end{itemize}
+
+\subsubsection{Flujo de Ejecución}
+
+Al iniciar la aplicación a través de \texttt{app/main.py}, se inyectan las dependencias necesarias en el \texttt{DatasetService}. El flujo asegura que todos los colaboradores trabajen exactamente con los mismos datos.
+
+\lstinputlisting[language=Python, firstline=7, lastline=23, caption=Orquestación del setup en app/main.py]{app/main.py}
+
 \subsection{Tokenización}
 \subsection{Truncado}
 \subsection{Padding}
