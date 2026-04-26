@@ -5,6 +5,8 @@ app/__init__.py
 app/config.py
 app/constants.py
 app/main.py
+app/converters/__init__.py
+app/converters/dialogue_format.py
 app/dataset/__init__.py
 app/dataset/downloader.py
 app/dataset/processor.py
