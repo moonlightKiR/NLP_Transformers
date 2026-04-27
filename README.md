@@ -29,6 +29,7 @@ Este proyecto forma parte de la asignatura de Deep Learning y se centra en la ex
 │   ├── config.py         # General project configuration
 │   ├── constants.py      # Global project constants
 │   └── main.py           # Entry point (Orchestrator)
+├── tests/                # Unit and integration tests
 ├── .data/                # Local datasets and preprocessed tensors (ignored)
 ├── .models/              # Local GGUF models and tokenizers (ignored)
 ├── report/               # LaTeX report and documentation
@@ -70,6 +71,16 @@ The pipeline is optimized for macOS (M1/M2/M3) using the MPS backend, offloading
 To manage extensive dialogue histories, the system combines architectural strengths with data strategies:
 - Native Support: Utilization of Hybrid Attention (Gemma 4) and Gated Delta Networks (Qwen 3.5) for massive context windows.
 - Context Windowing: Automated turn-truncation in the preprocessing phase to prioritize the most recent and relevant conversational context.
+
+## Testing
+The project uses structured tests in the `tests/` directory (mirroring the `app/` structure). To run specific tests using `uv`:
+```bash
+# Test inference
+uv run python tests/models/test_inference.py
+
+# Test data processing
+uv run python tests/dataset/test_processor.py
+```
 
 ## Code Standards
 The project follows strict typing and style rules. You can validate the code manually with:

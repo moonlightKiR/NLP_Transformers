@@ -22,25 +22,25 @@ from app.models.constants import (
     QWEN_TOKENIZER_FILES,
 )
 from app.models.downloader import ModelDownloader, ModelService
+from app.models.inference import InferenceService
+from app.models.inference_cpp import InferenceCPPService
 
 
 def main():
-    """Main entry point for the application."""
+    """Main entry point for the application orchestrating the full pipeline."""
 
-    # 1. Dataset & Models Ingestion
-    git_downloader = GitDownloader()
-    verifier = IntegrityVerifier()
-    dataset_service = DatasetService(git_downloader, verifier=verifier)
-
+    # 1. Resource Ingestion
     print("=== NLP Transformers: Resource Ingestion ===")
+    dataset_service = DatasetService(
+        GitDownloader(), verifier=IntegrityVerifier()
+    )
     dataset_service.setup_dataset(
         url=SGD_REPO_URL,
         target_path=settings.dataset_path,
         manifest_path=settings.manifest_path,
     )
 
-    model_downloader = ModelDownloader()
-    model_service = ModelService(model_downloader)
+    model_service = ModelService(ModelDownloader())
     model_service.setup_model(
         url=GEMMA_MODEL_URL, target_dir=model_settings.gguf_dir
     )
@@ -54,34 +54,64 @@ def main():
         GEMMA_TOKENIZER_FILES, model_settings.gemma_tok_path
     )
 
-    # 2. Structuring (Raw SGD -> JSON Chat Format)
+    # 2. Data Structuring
     print("\n=== NLP Transformers: Data Structuring ===")
     dialogue_processor = DialogueProcessor()
     structuring_service = StructuringService(dialogue_processor)
-
     structuring_service.structure_directory(settings.train_raw_path)
     structuring_service.structure_directory(settings.test_raw_path)
 
-    # 3. Preprocessing (JSON Chat -> Model Tensors)
-    # --- Qwen ---
-    print("\n=== NLP Transformers: Qwen Tokenization ===")
-    qwen_service = PreprocessingService(
+    # 3. Preprocessing
+    print("\n=== NLP Transformers: Preprocessing & Tokenization ===")
+    qwen_preprocessor = PreprocessingService(
         dialogue_processor,
         model_label="qwen",
         tokenizer_name=str(model_settings.qwen_tok_path),
     )
-    qwen_service.process_structured_directory(TRAIN_SPLIT_STRUCTURED_DIR)
-    qwen_service.process_structured_directory(TEST_SPLIT_STRUCTURED_DIR)
+    qwen_preprocessor.process_structured_directory(TRAIN_SPLIT_STRUCTURED_DIR)
+    qwen_preprocessor.process_structured_directory(TEST_SPLIT_STRUCTURED_DIR)
 
-    # --- Gemma ---
-    print("\n=== NLP Transformers: Gemma Tokenization ===")
-    gemma_service = PreprocessingService(
+    gemma_preprocessor = PreprocessingService(
         dialogue_processor,
         model_label="gemma",
         tokenizer_name=str(model_settings.gemma_tok_path),
     )
-    gemma_service.process_structured_directory(TRAIN_SPLIT_STRUCTURED_DIR)
-    gemma_service.process_structured_directory(TEST_SPLIT_STRUCTURED_DIR)
+    gemma_preprocessor.process_structured_directory(TRAIN_SPLIT_STRUCTURED_DIR)
+    gemma_preprocessor.process_structured_directory(TEST_SPLIT_STRUCTURED_DIR)
+
+    # 4. Initial Inference (Demonstrating failures and successes)
+    print("\n=== NLP Transformers: Initial Inference ===")
+
+    qwen_gguf = model_settings.gguf_dir / "Qwen3.5-9B-Q3_K_M.gguf"
+    gemma_gguf = model_settings.gguf_dir / "gemma-4-E2B-it-Q3_K_M.gguf"
+
+    # ATTEMPT 1: Standard Transformers Library
+    # (Known to fail for these new models)
+    print(
+        "\n[STEP A] Attempting inference \
+            with Standard 'transformers' library..."
+    )
+    qwen_trans = InferenceService(
+        qwen_gguf, model_settings.qwen_tok_path, "qwen"
+    )
+    qwen_trans.run_initial_test(dialogue_processor, TEST_SPLIT_STRUCTURED_DIR)
+
+    gemma_trans = InferenceService(
+        gemma_gguf, model_settings.gemma_tok_path, "gemma"
+    )
+    gemma_trans.run_initial_test(dialogue_processor, TEST_SPLIT_STRUCTURED_DIR)
+
+    # ATTEMPT 2: Llama-cpp-python
+    # (Fallback optimized for GGUF and Mac)
+    print(
+        "\n[STEP B] Attempting inference with 'llama-cpp-python' \
+            (Optimized Backend)..."
+    )
+    qwen_cpp = InferenceCPPService(qwen_gguf, "qwen")
+    qwen_cpp.run_initial_test(dialogue_processor, TEST_SPLIT_STRUCTURED_DIR)
+
+    gemma_cpp = InferenceCPPService(gemma_gguf, "gemma")
+    gemma_cpp.run_initial_test(dialogue_processor, TEST_SPLIT_STRUCTURED_DIR)
 
 
 if __name__ == "__main__":
