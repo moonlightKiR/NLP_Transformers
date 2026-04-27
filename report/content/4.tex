@@ -1,1 +1,41 @@
 \section{Inferencia inicial \textit{(Sin optimización)}}
+
+Antes de proceder con el ajuste fino de los modelos, se ha realizado una fase de inferencia inicial para evaluar el desempeño base de las arquitecturas seleccionadas (Gemma 4 y Qwen 3.5).
+
+\subsection{Justificación Técnica de la Librería de Inferencia}
+
+Para la ejecución de los modelos en formato \texttt{GGUF}, se evaluaron dos alternativas principales: \texttt{llama.cpp} y la librería \texttt{transformers} de Hugging Face. A pesar de que \texttt{llama.cpp} ofrece una eficiencia superior en entornos de ejecución local, se optó por documentar el intento con \texttt{transformers} por coherencia académica.
+
+Sin embargo, los resultados demostraron que las arquitecturas más recientes (\texttt{qwen35} y \texttt{gemma4}) aún no están soportadas nativamente por el cargador de GGUF de \texttt{transformers}, lo que obligó al uso del backend \texttt{llama-cpp-python} como solución de alto rendimiento para hardware Apple Silicon.
+
+\subsection{Evaluación Cuantitativa (Eficiencia)}
+
+Se ha medido el rendimiento de ambos modelos realizando una tarea de generación de respuesta sobre un diálogo del split de test. Los resultados obtenidos en el hardware de prueba (Apple Silicon GPU) se resumen en la siguiente tabla:
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+        \hline
+        \textbf{Métrica}          & \textbf{Qwen 3.5 (9B)}  & \textbf{Gemma 4 (2B)}        \\ \hline
+        Velocidad de Generación   & 21.51 tokens/sec        & \textbf{56.48 tokens/sec}    \\ \hline
+        Tiempo de Respuesta       & 5.95s                   & \textbf{2.27s}               \\ \hline
+        Arquitectura de Atención  & Gated Delta Networks    & Hybrid (Global + SWA)        \\ \hline
+        Backend de Ejecución      & Metal (MPS)             & Metal (MPS)                  \\ \hline
+    \end{tabularx}
+    \caption{Comparativa de eficiencia en inferencia inicial Zero-Shot.}
+    \label{tab:inferencia_cuantitativa}
+\end{table}
+
+Como se observa, \textbf{Gemma 4 es aproximadamente 2.6 veces más rápida} que Qwen 3.5. Esta diferencia se atribuye no solo al menor número de parámetros de su núcleo (2B frente a 9B), sino también al uso eficiente de la caché de ventana deslizante (\textit{Sliding Window Attention}), optimizada nativamente en el backend de Metal.
+
+\subsection{Evaluación Cualitativa (Comportamiento)}
+
+A nivel cualitativo, se han observado los siguientes patrones en las respuestas generadas sin entrenamiento específico (\textit{Zero-Shot}):
+
+\begin{itemize}
+    \item \textbf{Comprensión del Contexto:} Ambos modelos demuestran una capacidad excelente para identificar entidades clave. En el test, mantuvieron correctamente el nombre del restaurante (P.F. Chang's), la ubicación (Corte Madera) y la hora (12:00 PM).
+    \item \textbf{Identidad del Modelo:} Al ser modelos \textit{Instruct} generalistas, tienden a dar consejos sobre cómo realizar la reserva (ej. "visita la web", "llama al restaurante") en lugar de actuar como el agente de reservas que requiere el dataset SGD.
+    \item \textbf{Alucinaciones:} No se detectaron alucinaciones de hechos graves, aunque el tono es excesivamente informativo para una tarea de diálogo orientada a servicios.
+\end{itemize}
+
+Esta evaluación confirma que, aunque las arquitecturas base son extremadamente potentes y comprenden el lenguaje natural, es \textbf{imprescindible realizar un proceso de Fine-Tuning} para que el modelo aprenda a interactuar con las APIs del sistema y adopte el comportamiento específico de un agente conversacional orientado a tareas.

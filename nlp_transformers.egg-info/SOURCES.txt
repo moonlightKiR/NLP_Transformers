@@ -14,6 +14,8 @@ app/models/__init__.py
 app/models/config.py
 app/models/constants.py
 app/models/downloader.py
+app/models/inference.py
+app/models/inference_cpp.py
 nlp_transformers.egg-info/PKG-INFO
 nlp_transformers.egg-info/SOURCES.txt
 nlp_transformers.egg-info/dependency_links.txt
