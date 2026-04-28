@@ -14,4 +14,8 @@ Requires-Dist: accelerate>=0.26.0
 Requires-Dist: sentencepiece>=0.2.0
 Requires-Dist: gguf>=0.6.0
 Requires-Dist: llama-cpp-python>=0.2.76
+Requires-Dist: peft>=0.10.0
+Requires-Dist: evaluate>=0.4.1
+Requires-Dist: mlx-lm>=0.12.0
+Requires-Dist: python-dotenv>=1.2.2
 Dynamic: license-file

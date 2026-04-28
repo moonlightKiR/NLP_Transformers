@@ -1,2 +1,3 @@
 [console_scripts]
-nlp-t = app.main:main
+nlp-main = app.main:main
+nlp-train = app.training.training:run_full_optimization_phase

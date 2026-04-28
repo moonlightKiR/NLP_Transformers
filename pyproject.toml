@@ -16,10 +16,15 @@ dependencies = [
     "sentencepiece>=0.2.0",
     "gguf>=0.6.0",
     "llama-cpp-python>=0.2.76",
+    "peft>=0.10.0",
+    "evaluate>=0.4.1",
+    "mlx-lm>=0.12.0",
+    "python-dotenv>=1.2.2",
 ]
 
 [project.scripts]
-nlp-t = "app.main:main"
+nlp-main = "app.main:main"
+nlp-train = "app.training.training:run_full_optimization_phase"
 
 [tool.uv]
 package = true
