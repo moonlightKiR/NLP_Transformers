@@ -4,6 +4,7 @@ import torch
 
 from app.config import settings
 from app.converters.dialogue_format import format_sgd_to_messages
+from app.converters.templates import CHAT_TEMPLATES
 
 
 class DialogueProcessor:
@@ -41,7 +42,7 @@ class StructuringService:
         json_files = sorted(list(input_dir.glob("dialogues_*.json")))
         print(
             f"[+] Structuring {len(json_files)} files: {split_name} \
-                -> structured/{split_name}/"
+            -> structured/{split_name}/"
         )
 
         for file_path in json_files:
@@ -62,26 +63,6 @@ class TokenizerService:
     """Wrapper for model-specific tokenization logic with
     Chat Template support."""
 
-    # Official templates fallback if not found in local files
-    TEMPLATES = {
-        "gemma": (
-            "{{ bos_token }}{% for message in messages %}"
-            "{% if message['role'] == 'user' %}"
-            "{{ '<start_of_turn>user\\n' + "
-            "message['content'] + '<end_of_turn>\\n' }}"
-            "{% elif message['role'] == 'assistant' %}"
-            "{{ '<start_of_turn>model\\n' + "
-            "message['content'] + '<end_of_turn>\\n' }}"
-            "{% endif %}{% endfor %}"
-        ),
-        "qwen": (
-            "{% for message in messages %}"
-            "{{'<|im_start|>' + message['role'] + '\\n' + "
-            "message['content'] + '<|im_end|>' + '\\n'}}"
-            "{% endfor %}"
-        ),
-    }
-
     def __init__(self, tokenizer, model_label):
         self._tokenizer = tokenizer
         self.device = (
@@ -97,8 +78,8 @@ class TokenizerService:
             or self._tokenizer.chat_template is None
         ):
             print(f"[!] Injecting missing chat template for {model_label}...")
-            self._tokenizer.chat_template = self.TEMPLATES.get(
-                model_label, self.TEMPLATES["qwen"]
+            self._tokenizer.chat_template = CHAT_TEMPLATES.get(
+                model_label, CHAT_TEMPLATES["qwen"]
             )
 
         if self.device.type == "mps":
@@ -139,13 +120,19 @@ class PreprocessingService:
 
         print(
             f"[+] Loading tokenizer for {self._model_label}:\
-                {self._tokenizer_name}..."
+            {self._tokenizer_name}..."
         )
         raw_tokenizer = AutoTokenizer.from_pretrained(
             self._tokenizer_name, trust_remote_code=True
         )
+        # Ensure tokenizer has a pad token;
+        # prefer eos_token, else add a PAD token
         if raw_tokenizer.pad_token is None:
-            raw_tokenizer.pad_token = raw_tokenizer.eos_token
+            if getattr(raw_tokenizer, "eos_token", None):
+                raw_tokenizer.pad_token = raw_tokenizer.eos_token
+            else:
+                raw_tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+                raw_tokenizer.pad_token = "[PAD]"
         self._tokenizer_service = TokenizerService(
             raw_tokenizer, self._model_label
         )
@@ -170,7 +157,7 @@ class PreprocessingService:
         if not pending_files:
             print(
                 f"[-] Tensors for '{self._model_label}/{split_name}' \
-                    already exist."
+                already exist."
             )
             return
 
@@ -179,7 +166,7 @@ class PreprocessingService:
 
         print(
             f"[+] Tokenizing {len(pending_files)} files \
-                for '{self._model_label}'..."
+            for '{self._model_label}'..."
         )
         for i, file_path in enumerate(pending_files, 1):
             conversations = self._processor.load_json(file_path)
@@ -191,10 +178,10 @@ class PreprocessingService:
             if i % 20 == 0 or i == len(pending_files):
                 print(
                     f"    - [{i}/{len(pending_files)}] \
-                        Processed: {file_path.name}"
+                    Processed: {file_path.name}"
                 )
 
         print(
             f"[✓] Tokenization for '{self._model_label}/{split_name}' \
-                completed."
+            completed."
         )

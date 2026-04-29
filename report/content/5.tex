@@ -1,1 +1,52 @@
 \section{Optimización de parámetros}
+
+En esta fase se ha explorado la configuración óptima de los hiperparámetros mediante un enfoque de búsqueda sistemática, utilizando la librería \textbf{Optuna} a través del comando \texttt{uv run nlp-train}. Este proceso permite encontrar el equilibrio entre rendimiento y eficiencia mediante un barrido automatizado.
+
+\subsection{Metodología de Búsqueda}
+
+Se ha definido un espacio de búsqueda centrado en:
+\begin{itemize}
+    \item \textbf{Learning Rate (LR):} Rango de $[1\cdot 10^{-5}, 5\cdot 10^{-5}]$.
+    \item \textbf{Batch Size:} Ajustado a la capacidad máxima de la memoria Metal (1-2).
+    \item \textbf{Epochs/Iters:} Evaluación de la convergencia en 100 iteraciones.
+\end{itemize}
+
+Adicionalmente, para evitar errores de \textit{out-of-memory} en MLX/Metal durante la evaluación, se limita el número de batches de validación (\texttt{val\_batches}). En esta práctica se utiliza una validación derivada del conjunto de test (20\%) como señal rápida de convergencia, manteniendo el resto del test para evaluación final.
+
+\subsection{Métricas de Generación}
+
+A diferencia de la inferencia base, la optimización se ha evaluado mediante métricas específicas de NLP que miden la calidad intrínseca del texto generado:
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+        \hline
+        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Llama 3.2 (1B)}    \\ \hline
+        \textbf{Perplexity (PPL)}  & 3.92                    & 4.53                          \\ \hline
+        \textbf{Coherence Score}   & 0.88                    & 0.50                          \\ \hline
+        \textbf{Diversidad Léxica}& 0.72                    & 0.88                          \\ \hline
+    \end{tabularx}
+    \caption{Evaluación de métricas de generación tras el barrido de hiperparámetros.}
+    \label{tab:metricas_generacion}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Perplexity:} Qwen demuestra una mayor confianza en sus predicciones sobre el dataset SGD, aunque Llama 3.2-1B muestra una convergencia competitiva dado su menor tamaño.
+    \item \textbf{Coherence Score:} Qwen mantiene una coherencia superior, mientras que Llama 3.2-1B tiende a ser más creativo pero menos estructurado en sus respuestas iniciales.
+    \item \textbf{Diversidad Léxica:} Llama 3.2-1B utiliza un vocabulario significativamente más variado (0.88) en sus sugerencias.
+\end{itemize}
+
+\subsection{Conclusiones}
+
+\begin{itemize}
+    \item \textbf{Búsqueda sistemática:} Optuna permite explorar hiperparámetros de forma reproducible, reduciendo el sesgo de selección manual y acelerando la identificación de configuraciones prometedoras.
+    \item \textbf{Cuello de botella en validación:} En Apple Silicon (MLX/Metal) la evaluación puede ser más costosa que el entrenamiento; validar demasiados batches incrementa el consumo de memoria unificada y puede provocar \textit{out-of-memory}. Por ello se limita \texttt{val\_batches} para mantener estabilidad.
+    \item \textbf{Validación y test:} Se utiliza un 20\% del conjunto de test como validación para obtener una señal rápida de convergencia durante el barrido, reservando el 80\% restante para evaluación final. Esta decisión debe considerarse una limitación metodológica.
+    \item \textbf{Impacto de hiperparámetros:} Los parámetros con mayor influencia suelen ser el \textit{learning rate} y el \textit{rank} de LoRA: LR alto tiende a inestabilidad/peor generalización, mientras que ranks altos aumentan capacidad de adaptación a costa de mayor coste y riesgo de sobreajuste.
+    \item \textbf{Número de trials:} Un número reducido de pruebas sirve para observar tendencias, pero no garantiza un óptimo global; si se dispone de más recursos, conviene aumentar trials o refinar el rango alrededor de la mejor configuración encontrada.
+    \item \textbf{Trazabilidad:} La separación de experimentos por modelo en \texttt{.adapters/<model>/optuna} facilita comparar arquitecturas y auditar qué configuración produjo cada resultado.
+\end{itemize}
+
+\subsection{Selección final del modelo}
+
+Tras evaluar varias alternativas (Qwen y Llama), la implementación final de la fase de inferencia y evaluación utiliza el modelo Llama disponible en \texttt{report/app/}. Este modelo fue seleccionado por su compatibilidad con el pipeline GGUF/llama-cpp en el entorno Apple Silicon y por facilitar la integración con las plantillas estrictas usadas durante la evaluación.

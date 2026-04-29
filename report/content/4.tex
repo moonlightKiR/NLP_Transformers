@@ -1,41 +1,42 @@
 \section{Inferencia inicial \textit{(Sin optimización)}}
 
-Antes de proceder con el ajuste fino de los modelos, se ha realizado una fase de inferencia inicial para evaluar el desempeño base de las arquitecturas seleccionadas (Gemma 4 y Qwen 3.5).
+\subsection{Justificación Técnica del Backend}
 
-\subsection{Justificación Técnica de la Librería de Inferencia}
+Se ha realizado una comparativa entre la librería estándar \texttt{transformers} y el backend optimizado \texttt{llama-cpp-python}. Esta fase es crucial para documentar las limitaciones actuales de las librerías de alto nivel frente a arquitecturas de vanguardia.
 
-Para la ejecución de los modelos en formato \texttt{GGUF}, se evaluaron dos alternativas principales: \texttt{llama.cpp} y la librería \texttt{transformers} de Hugging Face. A pesar de que \texttt{llama.cpp} ofrece una eficiencia superior en entornos de ejecución local, se optó por documentar el intento con \texttt{transformers} por coherencia académica.
+\subsubsection{Limitaciones de la Librería Estándar (Transformers)}
 
-Sin embargo, los resultados demostraron que las arquitecturas más recientes (\texttt{qwen35} y \texttt{gemma4}) aún no están soportadas nativamente por el cargador de GGUF de \texttt{transformers}, lo que obligó al uso del backend \texttt{llama-cpp-python} como solución de alto rendimiento para hardware Apple Silicon.
+Los intentos de inferencia con la librería estándar fallaron en ambos modelos, documentando los siguientes desafíos técnicos:
+\begin{itemize}
+    \item \textbf{Qwen 3.5:} El cargador de GGUF de \texttt{transformers} no reconoce aún la arquitectura específica \texttt{qwen35}, lo que impide la carga directa de los pesos cuantizados.
+    \item \textbf{Llama 3.2-1B:} El modelo falló inicialmente en \texttt{transformers} debido a una gestión ineficiente de la memoria (\textit{device\_map}) al intentar cargar el GGUF sin la cuantización nativa del backend optimizado.
+\end{itemize}
+
+\subsubsection{Solución: Llama-cpp-python y Strict Templates}
+
+Se ha optado por \texttt{llama-cpp-python} con soporte para \textbf{Metal (MPS)}. Una mejora fundamental ha sido la aplicación manual de \textbf{Strict Chat Templates}. Al inyectar los tokens exactos de control (formato Llama 3.2), se ha logrado activar el comportamiento correcto del modelo.
 
 \subsection{Evaluación Cuantitativa (Eficiencia)}
 
-Se ha medido el rendimiento de ambos modelos realizando una tarea de generación de respuesta sobre un diálogo del split de test. Los resultados obtenidos en el hardware de prueba (Apple Silicon GPU) se resumen en la siguiente tabla:
+Los resultados finales en hardware Apple Silicon (18GB RAM unificada) se resumen a continuación:
 
 \begin{table}[H]
     \centering
     \begin{tabularx}{\textwidth}{|l|X|X|}
         \hline
-        \textbf{Métrica}          & \textbf{Qwen 3.5 (9B)}  & \textbf{Gemma 4 (2B)}        \\ \hline
-        Velocidad de Generación   & 21.51 tokens/sec        & \textbf{56.48 tokens/sec}    \\ \hline
-        Tiempo de Respuesta       & 5.95s                   & \textbf{2.27s}               \\ \hline
-        Arquitectura de Atención  & Gated Delta Networks    & Hybrid (Global + SWA)        \\ \hline
-        Backend de Ejecución      & Metal (MPS)             & Metal (MPS)                  \\ \hline
+        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Llama 3.2 (1B)}    \\ \hline
+        Velocidad de Generación   & \textbf{65.66 tokens/sec} & 48.12 tokens/sec              \\ \hline
+        Tiempo de Respuesta       & \textbf{1.95s}          & 2.12s                         \\ \hline
+        Backend de Ejecución      & Metal (MPS)             & Metal (MPS)                   \\ \hline
+        Formato de Prompt         & Strict Chat Template    & Strict Chat Template          \\ \hline
     \end{tabularx}
-    \caption{Comparativa de eficiencia en inferencia inicial Zero-Shot.}
-    \label{tab:inferencia_cuantitativa}
+    \caption{Comparativa de eficiencia en inferencia inicial con modelos optimizados para 18GB RAM.}
+    \label{tab:inferencia_cuantitativa_final}
 \end{table}
-
-Como se observa, \textbf{Gemma 4 es aproximadamente 2.6 veces más rápida} que Qwen 3.5. Esta diferencia se atribuye no solo al menor número de parámetros de su núcleo (2B frente a 9B), sino también al uso eficiente de la caché de ventana deslizante (\textit{Sliding Window Attention}), optimizada nativamente en el backend de Metal.
 
 \subsection{Evaluación Cualitativa (Comportamiento)}
 
-A nivel cualitativo, se han observado los siguientes patrones en las respuestas generadas sin entrenamiento específico (\textit{Zero-Shot}):
-
 \begin{itemize}
-    \item \textbf{Comprensión del Contexto:} Ambos modelos demuestran una capacidad excelente para identificar entidades clave. En el test, mantuvieron correctamente el nombre del restaurante (P.F. Chang's), la ubicación (Corte Madera) y la hora (12:00 PM).
-    \item \textbf{Identidad del Modelo:} Al ser modelos \textit{Instruct} generalistas, tienden a dar consejos sobre cómo realizar la reserva (ej. "visita la web", "llama al restaurante") en lugar de actuar como el agente de reservas que requiere el dataset SGD.
-    \item \textbf{Alucinaciones:} No se detectaron alucinaciones de hechos graves, aunque el tono es excesivamente informativo para una tarea de diálogo orientada a servicios.
+    \item \textbf{Qwen 3.5 2B (Razonamiento):} A pesar de ser la versión de 2B, el modelo mantiene su capacidad de \textit{"Thinking Process"}, analizando la intención de reserva y detectando ambigüedades horarias (ej. "afternoon 12"). Su velocidad es sobresaliente para una experiencia interactiva.
+    \item \textbf{Llama 3.2-1B (Asistencia):} Genera respuestas proactivas y bien estructuradas, sugiriendo métodos externos para completar la reserva, demostrando una excelente alineación con instrucciones (\textit{Instruction Following}) a pesar de su reducido tamaño.
 \end{itemize}
-
-Esta evaluación confirma que, aunque las arquitecturas base son extremadamente potentes y comprenden el lenguaje natural, es \textbf{imprescindible realizar un proceso de Fine-Tuning} para que el modelo aprenda a interactuar con las APIs del sistema y adopte el comportamiento específico de un agente conversacional orientado a tareas.

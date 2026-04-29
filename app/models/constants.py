@@ -1,18 +1,26 @@
-# Model URLs (Hugging Face)
-GEMMA_MODEL_URL = "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q3_K_M.gguf"
-QWEN_MODEL_URL = "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/main/Qwen3.5-9B-Q3_K_M.gguf"
+# Hugging Face Model IDs for Training (Safetensors)
+QWEN_TRAIN_ID = "Qwen/Qwen3.5-2B"
+LLAMA_TRAIN_ID = "meta-llama/Llama-3.2-1B-Instruct"
 
-# Tokenizer URLs
+# GGUF Model URLs for Inference (Unsloth versions)
+QWEN_MODEL_URL = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf"
+LLAMA_MODEL_URL = "https://huggingface.co/unsloth/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+
+# Local GGUF Filenames
+QWEN_GGUF_NAME = "Qwen3.5-2B-Q4_K_M.gguf"
+LLAMA_GGUF_NAME = "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+
+# Tokenizer File URLs
 QWEN_TOKENIZER_FILES = [
-    "https://huggingface.co/Qwen/Qwen3.5-9B/resolve/main/tokenizer.json",
-    "https://huggingface.co/Qwen/Qwen3.5-9B/resolve/main/tokenizer_config.json",
+    f"https://huggingface.co/{QWEN_TRAIN_ID}/resolve/main/tokenizer.json",
+    f"https://huggingface.co/{QWEN_TRAIN_ID}/resolve/main/tokenizer_config.json",
 ]
 
-GEMMA_TOKENIZER_FILES = [
-    "https://huggingface.co/google/gemma-4-E4B-it/resolve/main/tokenizer.json",
-    "https://huggingface.co/google/gemma-4-E4B-it/resolve/main/tokenizer_config.json",
+LLAMA_TOKENIZER_FILES = [
+    f"https://huggingface.co/{LLAMA_TRAIN_ID}/resolve/main/tokenizer.json",
+    f"https://huggingface.co/{LLAMA_TRAIN_ID}/resolve/main/tokenizer_config.json",
 ]
 
-# Tokenizer local directory names
+# Tokenizer directory names (for local storage)
 QWEN_TOKENIZER_DIR_NAME = "qwen"
-GEMMA_TOKENIZER_DIR_NAME = "gemma"
+LLAMA_TOKENIZER_DIR_NAME = "llama"

@@ -1,40 +1,32 @@
 \section{Selección del Caso de Uso y Dataset}
 
 \subsection{Caso de Uso: Generación de Respuestas en Diálogo}
-Para esta práctica, se ha seleccionado la tarea de \textbf{Generación de Respuestas en Diálogo}. Esta tarea consiste en desarrollar modelos capaces de procesar el historial de una conversación y generar una respuesta coherente, relevante y gramaticalmente correcta. Es un reto complejo que requiere que el modelo comprenda no solo el lenguaje, sino también el contexto y, en muchos casos, el objetivo del usuario dentro de un flujo conversacional.
-
-\subsection{Datasets Considerados}
-Durante la fase de investigación se evaluaron diversas fuentes de datos ampliamente utilizadas en la literatura científica para el entrenamiento de sistemas de diálogo:
-\begin{itemize}
-    \item \textbf{MultiWOZ}: Un estándar para sistemas orientados a tareas, aunque con un lenguaje a veces limitado por su estructura rígida.
-    \item \textbf{Persona-Chat}: Ideal para conversaciones de tipo \textit{chit-chat} con enfoque en la personalidad, pero menos orientado a la resolución de problemas técnicos o servicios.
-    \item \textbf{DailyDialog}: Interesante por sus anotaciones emocionales en charlas cotidianas.
-    \item \textbf{EmpatheticDialogues}: Enfocado en la generación de respuestas con carga empática.
-\end{itemize}
+Para esta práctica, se ha seleccionado la tarea de \textbf{Generación de Respuestas en Diálogo}. Esta tarea consiste en desarrollar modelos capaces de procesar el historial de una conversación y generar una respuesta coherente, relevante y gramaticalmente correcta.
 
 \subsection{Dataset Seleccionado: SGD (Schema-Guided Dialogue)}
-Finalmente, se ha optado por utilizar el dataset \textbf{SGD (Schema-Guided Dialogue)} de Google. La elección se fundamenta en que representa el estado del arte actual para modelos multidominio. A diferencia de otros conjuntos de datos, SGD ofrece:
-\begin{itemize}
-    \item \textbf{Gran Escala}: Incluye más de 16,000 diálogos que cubren 20 dominios distintos (viajes, bancos, cine, clima, etc.).
-    \item \textbf{Capacidad de Generalización}: Su arquitectura basada en esquemas permite que el modelo aprenda a interactuar con servicios y APIs mediante descripciones en lenguaje natural.
-    \item \textbf{Desafío Técnico}: Exige una mayor gestión del contexto y del estado del diálogo que datasets previos, lo que lo hace ideal para poner a prueba la potencia de las arquitecturas Transformer seleccionadas.
-\end{itemize}
+Se ha optado por utilizar el dataset \textbf{SGD (Schema-Guided Dialogue)} de Google. La elección se fundamenta en que representa el estado del arte actual para modelos multidominio, ofreciendo más de 16,000 diálogos en 20 dominios distintos.
 
-\subsection{Modelos}
-Para cumplir con el requerimiento de comparar dos arquitecturas de Transformers distintas, se han seleccionado los siguientes modelos de última generación en formato \texttt{GGUF}, gestionados localmente en \texttt{app/models/}:
+\subsection{Modelos Seleccionados}
+Para la comparativa, se han seleccionado dos arquitecturas de vanguardia que ofrecen un equilibrio óptimo entre tamaño y capacidad de razonamiento en hardware local:
 
 \begin{itemize}
-    \item \textbf{Gemma 4 E2B-it (Google DeepMind):} Versión de 2 billones de parámetros efectivos optimizada para instrucciones. Utiliza una arquitectura de \textbf{Atención Híbrida} (global y \textit{sliding-window}).
+    \item \textbf{Qwen 3.5-2B (Alibaba Qwen):} Un modelo de 2 billones de parámetros altamente optimizado. Se ha seleccionado esta versión frente a la de 4B para garantizar la estabilidad del entrenamiento en sistemas con 18GB de RAM unificada, manteniendo un rendimiento sobresaliente.
     \begin{itemize}
-        \item \textit{Source:} \href{https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF}{unsloth/gemma-4-E2B-it-GGUF}
-        \item \textit{Archivo:} \texttt{gemma-4-E2B-it-Q3\_K\_M.gguf}
+        \item \textit{Source:} \href{https://huggingface.co/Qwen/Qwen3.5-2B}{Qwen/Qwen3.5-2B}
+        \item \textit{GGUF:} \texttt{Qwen3.5-2B-Q4\_K\_M.gguf} (Unsloth)
     \end{itemize}
     
-    \item \textbf{Qwen 3.5-9B (Alibaba Qwen):} Modelo de 9 billones de parámetros basado en \textbf{Gated Delta Networks (GDN)} y \textbf{Mixture-of-Experts (MoE)}, permitiendo un manejo de contexto masivo con alta eficiencia.
+    \item \textbf{Llama 3.2-1B-Instruct (Meta):} Modelo de 1 billón de parámetros optimizado para tareas de diálogo y razonamiento ligero en dispositivos locales.
     \begin{itemize}
-        \item \textit{Source:} \href{https://huggingface.co/unsloth/Qwen3.5-9B-GGUF}{unsloth/Qwen3.5-9B-GGUF}
-        \item \textit{Archivo:} \texttt{Qwen3.5-9B-Q3\_K\_M.gguf}
+        \item \textit{Source:} \href{https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct}{meta-llama/Llama-3.2-1B-Instruct}
+        \item \textit{GGUF:} \texttt{Llama-3.2-1B-Instruct-Q4\_K\_M.gguf} (Unsloth)
     \end{itemize}
 \end{itemize}
 
-Esta selección permite contrastar una arquitectura de atención híbrida frente a una de atención lineal con MoE, proporcionando un marco comparativo ideal para evaluar rendimiento y eficiencia en la generación de diálogos.
+\subsection{Evolución de la Selección y Desafíos Técnicos}
+La selección final es fruto de un proceso de iteración donde se descartaron otros modelos por limitaciones de acceso y arquitectura:
+\begin{itemize}
+    \item \textbf{Llama 3.2 3B:} Se intentó integrar esta arquitectura, pero al ser un repositorio \textit{Gated}, requiere validación manual y el uso de un token de Hugging Face.
+    \item \textbf{Gemma 4 E2B-it:} Se descartó tras detectar una incompatibilidad estructural entre los pesos (\textit{safetensors}) y la implementación de la clase \texttt{Gemma} en la librería MLX.
+    \item \textbf{Qwen 3.5 4B:} Se intentó su uso, pero el consumo de memoria Metal superó los límites del hardware durante el proceso de cálculo de gradientes.
+\end{itemize}

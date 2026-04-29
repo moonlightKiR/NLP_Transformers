@@ -1,10 +1,16 @@
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 from app.constants import (
     DATASET_DIR_NAME,
     TEST_SPLIT_STRUCTURED_DIR,
     TRAIN_SPLIT_STRUCTURED_DIR,
 )
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class AppConfig:
@@ -46,6 +52,11 @@ class AppConfig:
     def test_raw_path(self) -> Path:
         """Returns the raw test data path."""
         return self.dataset_path / TEST_SPLIT_STRUCTURED_DIR
+
+    @property
+    def hf_token(self) -> str:
+        """Returns the Hugging Face token from environment variables."""
+        return os.getenv("HF_TOKEN", "")
 
 
 # Global configuration instance

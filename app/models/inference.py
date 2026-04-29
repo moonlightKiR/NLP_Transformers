@@ -2,6 +2,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from app.config import settings
+from app.converters.templates import CHAT_TEMPLATES
 
 
 class InferenceService:
@@ -24,19 +25,30 @@ class InferenceService:
         """Loads the tokenizer and the GGUF model into memory."""
         print(
             f"[+] Loading tokenizer for {self.model_label} \
-                from: {self.tokenizer_path.name}"
+            from: {self.tokenizer_path.name}"
         )
         self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_path)
 
+        # Ensure tokenizer has pad_token
         if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.tokenizer.eos_token
+            if getattr(self.tokenizer, "eos_token", None):
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            else:
+                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+                self.tokenizer.pad_token = "[PAD]"
+
+        # Ensure a chat_template exists so apply_chat_template works
+        if not getattr(self.tokenizer, "chat_template", None):
+            self.tokenizer.chat_template = CHAT_TEMPLATES.get(
+                self.model_label, CHAT_TEMPLATES["qwen"]
+            )
 
         print(f"[+] Loading GGUF model {self.model_label} on {self.device}...")
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_path.parent,
             gguf_file=self.model_path.name,
             device_map="auto",
-            torch_dtype=torch.float16,
+            dtype=torch.float16,
             trust_remote_code=True,
         )
         print(f"[✓] {self.model_label} loaded successfully.")

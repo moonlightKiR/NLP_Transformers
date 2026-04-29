@@ -15,8 +15,8 @@ def run_initial_inference_test(model_label="qwen"):
         model_file = model_settings.gguf_dir / "Qwen3.5-9B-Q3_K_M.gguf"
         tokenizer_path = model_settings.qwen_tok_path
     else:
-        model_file = model_settings.gguf_dir / "gemma-4-E2B-it-Q3_K_M.gguf"
-        tokenizer_path = model_settings.gemma_tok_path
+        model_file = model_settings.gguf_dir / "llama-4-E2B-it-Q3_K_M.gguf"
+        tokenizer_path = model_settings.llama_tok_path
 
     # 2. Load a sample dialogue from structured data
     processor = DialogueProcessor()
@@ -50,5 +50,5 @@ def run_initial_inference_test(model_label="qwen"):
         print(f"[!] Inference failed: {e}")
 
 if __name__ == "__main__":
-    # You can change to "gemma" to test the other model
+    # You can change to "llama" to test the other model
     run_initial_inference_test("qwen")

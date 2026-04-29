@@ -4,6 +4,9 @@ __pycache__/
 .ruff_cache/
 nlp_transformers.egg-info/
 
+# Pthon enviroment file
+.env
+
 # Latex documentation
 *.aux
 *.fdb_latexmk
@@ -35,3 +38,4 @@ statement/
 # Dataset and model folders
 .data/
 .models/
+.adapters/

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from app.models.constants import (
-    GEMMA_TOKENIZER_DIR_NAME,
+    LLAMA_TOKENIZER_DIR_NAME,
     QWEN_TOKENIZER_DIR_NAME,
 )
 
@@ -25,14 +25,19 @@ class ModelConfig:
         return self.base_dir / "tokenizers"
 
     @property
+    def hf_models_dir(self):
+        """Returns the directory for full HF model snapshots (Safetensors)."""
+        return self.base_dir / "hf_models"
+
+    @property
     def qwen_tok_path(self):
         """Returns the local path for the Qwen tokenizer."""
         return self.tokenizers_dir / QWEN_TOKENIZER_DIR_NAME
 
     @property
-    def gemma_tok_path(self):
-        """Returns the local path for the Gemma tokenizer."""
-        return self.tokenizers_dir / GEMMA_TOKENIZER_DIR_NAME
+    def llama_tok_path(self):
+        """Returns the local path for the Llama tokenizer."""
+        return self.tokenizers_dir / LLAMA_TOKENIZER_DIR_NAME
 
 
 # Global configuration instance for models

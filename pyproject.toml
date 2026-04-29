@@ -16,10 +16,17 @@ dependencies = [
     "sentencepiece>=0.2.0",
     "gguf>=0.6.0",
     "llama-cpp-python>=0.2.76",
+    "peft>=0.10.0",
+    "evaluate>=0.4.1",
+    "mlx-lm>=0.12.0",
+    "python-dotenv>=1.2.2",
+    "optuna>=4.8.0",
 ]
 
 [project.scripts]
-nlp-t = "app.main:main"
+nlp-main = "app.main:main"
+nlp-train = "app.training.training:run_optimization_sweep"
+nlp-train-lora = "app.training.training_lora:run_lora_challenge_phase"
 
 [tool.uv]
 package = true

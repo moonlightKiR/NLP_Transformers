@@ -3,54 +3,66 @@ import time
 from llama_cpp import Llama
 
 from app.config import settings
+from app.converters.dialogue_format import ChatTemplateService
 
 
 class InferenceCPPService:
-    """Service to handle GGUF inference using llama-cpp-python
-    with performance metrics."""
+    """
+    Service to handle GGUF inference using llama-cpp-python
+    with strict chat templates.
+    """
 
-    def __init__(self, model_path, model_label):
+    def __init__(self, model_path, model_label, tokenizer_path):
         self.model_path = model_path
         self.model_label = model_label
+        self.tokenizer_path = tokenizer_path
         self.model = None
+        # Composition: Use ChatTemplateService for formatting
+        self._template_service = ChatTemplateService(tokenizer_path)
 
     def load_resources(self):
         """Loads the GGUF model into memory using Llama-cpp."""
         print(
             f"[+] Loading GGUF model {self.model_label} \
-                with llama-cpp-python (Backend: Metal/MPS)..."
+            (Backend: Metal/MPS)..."
         )
         self.model = Llama(
             model_path=str(self.model_path),
-            n_gpu_layers=-1,  # Offload all layers to GPU (Metal)
+            n_gpu_layers=-1,
             n_ctx=2048,
             verbose=False,
         )
         print(f"[✓] {self.model_label} loaded successfully on Mac GPU.")
 
     def generate_response(self, messages, max_new_tokens=128, temperature=0.7):
-        """Generates a response and returns performance metrics."""
+        """Generates a response using explicit chat templates
+        for consistency."""
         if not self.model:
             self.load_resources()
 
+        # 1. Apply strict chat template (Clean Code: Consistency with training)
+        formatted_prompt = self._template_service.format_messages(messages)
+
         print(
-            f"[+] Generating response with {self.model_label} (llama-cpp)..."
+            f"[+] Generating response with {self.model_label} \
+            (strict template)..."
         )
 
         start_time = time.time()
-        response_data = self.model.create_chat_completion(
-            messages=messages,
+        # Use create_completion instead of chat_completion
+        # because we already formatted the string
+        response_data = self.model.create_completion(
+            prompt=formatted_prompt,
             max_tokens=max_new_tokens,
             temperature=temperature,
+            stop=["<|im_end|>", "<|end|>", "</s>"],  # Safety stop tokens
         )
         end_time = time.time()
 
-        # Extract data
-        content = response_data["choices"][0]["message"]["content"].strip()
+        # Extract content and metrics
+        content = response_data["choices"][0]["text"].strip()
         tokens_generated = response_data["usage"]["completion_tokens"]
         duration = end_time - start_time
-
-        # Calculate tokens per second
         tps = tokens_generated / duration if duration > 0 else 0
 
         metrics = {
@@ -75,7 +87,7 @@ class InferenceCPPService:
 
             print(
                 f"\n--- {self.model_label.upper()} \
-                    Inference Test (LLAMA-CPP) ---"
+                Inference Test (Strict Templates) ---"
             )
             print("[Context]")
             for msg in sample_context:
@@ -83,7 +95,7 @@ class InferenceCPPService:
 
             response, metrics = self.generate_response(sample_context)
 
-            print("\n[Generated Response (llama-cpp)]")
+            print("\n[Generated Response]")
             print(f"  ASSISTANT: {response}")
 
             print("\n[Performance Metrics]")

@@ -1,0 +1,31 @@
+\section{Extensión opcional (extra desafío): LoRA}
+
+Como mejora avanzada en la optimización de parámetros, se ha implementado la técnica \textbf{LoRA (Low-Rank Adaptation)} ejecutada mediante el comando \texttt{uv run nlp-train-lora}. Esta metodología permite un ajuste fino extremadamente eficiente al congelar los pesos originales del modelo e inyectar matrices de bajo rango entrenables.
+
+\subsection{Implementación con MLX}
+
+Se ha utilizado la librería \textbf{MLX} de Apple, optimizada para hardware ARM. El proceso se ha configurado con los siguientes parámetros:
+\begin{itemize}
+    \item \textbf{Rank ($r$):} 8.
+    \item \textbf{Alpha:} 16.
+    \item \textbf{Capas Objetivo:} Proyecciones lineales en el mecanismo de atención.
+\end{itemize}
+
+\subsection{Eficiencia y Resultados}
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+        \hline
+        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Llama 3.2 (1B)}    \\ \hline
+        Parámetros Entrenables  & 5.60M (0.29\%)          & 3.20M (0.31\%)                \\ \hline
+        Tiempo de Entrenamiento  & 10.5 min                & 8.4 min                      \\ \hline
+        Estatus Final           & Completado              & Completado                    \\ \hline
+    \end{tabularx}
+    \caption{Resultados del proceso de Fine-Tuning LoRA.}
+    \label{tab:lora_final}
+\end{table}
+
+\subsection{Conclusión del Desafío}
+
+La implementación de LoRA ha demostrado ser la estrategia más eficaz para adaptar modelos de gran escala en entornos con recursos de memoria limitados (18GB), logrando una reducción de la \textit{Loss} significativa sin degradar el conocimiento base del modelo pre-entrenado.
