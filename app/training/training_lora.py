@@ -19,16 +19,16 @@ def run_lora_challenge_phase():
 
     # 2. Final Training with Optimized Parameters
     qwen_trainer = MLXTrainerService(training_settings.qwen_config["model"])
-    phi_trainer = MLXTrainerService(training_settings.phi_config["model"])
+    llama_trainer = MLXTrainerService(training_settings.llama_config["model"])
 
     print("\n[SECTION 7] Starting final LoRA training for Qwen...")
     qwen_trainer.train(
         training_settings.qwen_config, experiment_label="final_lora"
     )
 
-    print("\n[SECTION 7] Starting final LoRA training for Phi...")
-    phi_trainer.train(
-        training_settings.phi_config, experiment_label="final_lora"
+    print("\n[SECTION 7] Starting final LoRA training for Llama...")
+    llama_trainer.train(
+        training_settings.llama_config, experiment_label="final_lora"
     )
 
     print("\n[✓] LoRA Challenge Phase Completed.")

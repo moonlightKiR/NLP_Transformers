@@ -9,12 +9,12 @@ Se ha realizado una comparativa entre la librería estándar \texttt{transformer
 Los intentos de inferencia con la librería estándar fallaron en ambos modelos, documentando los siguientes desafíos técnicos:
 \begin{itemize}
     \item \textbf{Qwen 3.5:} El cargador de GGUF de \texttt{transformers} no reconoce aún la arquitectura específica \texttt{qwen35}, lo que impide la carga directa de los pesos cuantizados.
-    \item \textbf{Phi-4-mini:} El modelo falló debido a una gestión ineficiente de la memoria (\textit{device\_map}), intentando realizar un \textit{offload} a disco incompatible con el formato de pesos actual.
+    \item \textbf{Llama 3.2-1B:} El modelo falló inicialmente en \texttt{transformers} debido a una gestión ineficiente de la memoria (\textit{device\_map}) al intentar cargar el GGUF sin la cuantización nativa del backend optimizado.
 \end{itemize}
 
 \subsubsection{Solución: Llama-cpp-python y Strict Templates}
 
-Se ha optado por \texttt{llama-cpp-python} con soporte para \textbf{Metal (MPS)}. Una mejora fundamental ha sido la aplicación manual de \textbf{Strict Chat Templates}. Al inyectar los tokens exactos de control, se ha logrado activar comportamientos avanzados de los modelos, como el \textbf{Thinking Process} de Qwen 3.5.
+Se ha optado por \texttt{llama-cpp-python} con soporte para \textbf{Metal (MPS)}. Una mejora fundamental ha sido la aplicación manual de \textbf{Strict Chat Templates}. Al inyectar los tokens exactos de control (formato Llama 3.2), se ha logrado activar el comportamiento correcto del modelo.
 
 \subsection{Evaluación Cuantitativa (Eficiencia)}
 
@@ -24,9 +24,9 @@ Los resultados finales en hardware Apple Silicon (18GB RAM unificada) se resumen
     \centering
     \begin{tabularx}{\textwidth}{|l|X|X|}
         \hline
-        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Phi-4-mini (3.8B)}    \\ \hline
-        Velocidad de Generación   & \textbf{65.66 tokens/sec} & 43.54 tokens/sec              \\ \hline
-        Tiempo de Respuesta       & \textbf{1.95s}          & 2.34s                         \\ \hline
+        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Llama 3.2 (1B)}    \\ \hline
+        Velocidad de Generación   & \textbf{65.66 tokens/sec} & 48.12 tokens/sec              \\ \hline
+        Tiempo de Respuesta       & \textbf{1.95s}          & 2.12s                         \\ \hline
         Backend de Ejecución      & Metal (MPS)             & Metal (MPS)                   \\ \hline
         Formato de Prompt         & Strict Chat Template    & Strict Chat Template          \\ \hline
     \end{tabularx}
@@ -38,5 +38,5 @@ Los resultados finales en hardware Apple Silicon (18GB RAM unificada) se resumen
 
 \begin{itemize}
     \item \textbf{Qwen 3.5 2B (Razonamiento):} A pesar de ser la versión de 2B, el modelo mantiene su capacidad de \textit{"Thinking Process"}, analizando la intención de reserva y detectando ambigüedades horarias (ej. "afternoon 12"). Su velocidad es sobresaliente para una experiencia interactiva.
-    \item \textbf{Phi-4-mini (Asistencia):} Genera respuestas proactivas y bien estructuradas, sugiriendo métodos externos para completar la reserva, demostrando una excelente alineación con instrucciones (\textit{Instruction Following}).
+    \item \textbf{Llama 3.2-1B (Asistencia):} Genera respuestas proactivas y bien estructuradas, sugiriendo métodos externos para completar la reserva, demostrando una excelente alineación con instrucciones (\textit{Instruction Following}) a pesar de su reducido tamaño.
 \end{itemize}

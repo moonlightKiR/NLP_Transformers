@@ -6,9 +6,14 @@ Como valor añadido a la implementación técnica, se ha dise˜ñado una arquite
 
 Se ha implementado un servicio de detección (\texttt{HardwareDetector}) que identifica en tiempo de ejecución el silicio disponible. Esto permite que el mismo código se ejecute de forma nativa en:
 \begin{itemize}
-    \item \textbf{Apple Silicon:} Utilizando el framework \textbf{MLX} para maximizar el uso de la memoria unificada.
+    \item \textbf{Apple Silicon:} Utilizando el framework \textbf{MLX} para maximizar el uso de la memoria unificada. Se ha implementado un sistema de \textbf{Gestión Dinámica de Caché de Metal} que reserva automáticamente un margen de seguridad de \textbf{6GB} para el sistema operativo y libera la caché de forma agresiva mediante \texttt{mx.clear\_cache()} tras cada experimento.
     \item \textbf{NVIDIA CUDA (Colab/Cloud):} Utilizando el stack de \textbf{PyTorch + PEFT}, activando automáticamente la cuantización \textbf{QLoRA de 4 bits} mediante \textit{BitsAndBytes} para entornos con VRAM limitada como la NVIDIA T4.
-\end{itemize}
+    \end{itemize}
+
+    \subsection{Control de Memoria y Estabilidad}
+
+    Para garantizar la estabilidad en barridos largos de Optuna, el sistema ajusta dinámicamente el \texttt{set\_cache\_limit} de MLX basándose en la RAM total detectada por \texttt{HardwareDetector}. Esto evita que el proceso de entrenamiento compita excesivamente con el sistema, permitiendo ejecuciones de varios días sin degradación de rendimiento.
+
 
 \subsection{Patrón Factory para Entrenamiento}
 

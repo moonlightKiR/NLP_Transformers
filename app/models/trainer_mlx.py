@@ -2,10 +2,12 @@ import os
 import traceback
 from typing import Any, Optional
 
+import mlx.core as mx
 from mlx_lm import lora
 
 from app.config import settings
 from app.training.constants import adapters_lora_root
+from app.utils.hardware import HardwareDetector
 
 
 class MLXTrainerService:
@@ -15,6 +17,19 @@ class MLXTrainerService:
 
     def __init__(self, model_id: str):
         self.model_id = model_id
+        self._setup_memory_safeguards()
+
+    def _setup_memory_safeguards(self):
+        """Configures Metal cache limits to prevent system instability."""
+        if HardwareDetector.get_device_type() == "mlx":
+            total_ram = HardwareDetector.get_total_ram_gb()
+            # Reserve 6GB for the OS, use 70% of the rest for MLX cache
+            safe_limit = max(4, int((total_ram - 6) * 0.7))
+            print(
+                f"[Memory] Setting Metal cache limit to {safe_limit}GB "
+                f"(Total: {int(total_ram)}GB, Reserved for OS: 6GB)"
+            )
+            mx.metal.set_cache_limit(safe_limit * 1024 * 1024 * 1024)
 
     def _prepare_args(self, custom_args: Optional[dict[str, Any]] = None):
         """
@@ -40,7 +55,6 @@ class MLXTrainerService:
                 # Special handling for lora_parameters keys if passed flat
                 if key in ["rank", "scale", "dropout"]:
                     continue  # Will be handled in the defaults
-                    # getattr logic below
 
                 flag = "--" + key.replace("_", "-")
                 if isinstance(value, bool):
@@ -56,7 +70,7 @@ class MLXTrainerService:
 
         args = parser.parse_args(cli_args)
 
-        # Standard defaults
+        # Standard defaults optimized for 18GB RAM
         defaults = {
             "num_layers": 16,
             "batch_size": 1,
@@ -64,9 +78,9 @@ class MLXTrainerService:
             "learning_rate": 1e-5,
             "steps_per_report": 10,
             "steps_per_eval": 200,
-            "val_batches": 10,
+            "val_batches": 5,  # Reduced to save memory during eval
             "save_every": 50,
-            "max_seq_length": 2048,
+            "max_seq_length": 768,  # Reduced from 2048 to prevent OOM
             "grad_accumulation_steps": 1,
             "seed": 0,
             "fine_tune_type": "lora",
@@ -128,7 +142,8 @@ class MLXTrainerService:
         print(
             f"[+] LR: {args.learning_rate}\
             Batch: {args.batch_size}\
-            Rank: {args.lora_parameters['rank']}"
+            Rank: {args.lora_parameters['rank']}\
+            SeqLen: {args.max_seq_length}"
         )
 
         os.makedirs(args.adapter_path, exist_ok=True)
@@ -136,8 +151,58 @@ class MLXTrainerService:
         try:
             lora.run(args)
             print(f"[✓] Completed: {self.model_id} ({experiment_label})")
+        except FileNotFoundError as e:
+            # MLX raises FileNotFoundError when no safetensors are found
+            print(f"[!] FileNotFoundError during training: {e}")
+
+            # Generic fallback:
+            # download full HF snapshot into .models/hf_models/
+            from app.models.config import model_settings
+            from app.models.downloader import ModelDownloader, ModelService
+
+            # Map "org/name" to "name" for the directory
+            model_folder_name = self.model_id.split("/")[-1]
+            local_dir = model_settings.hf_models_dir / model_folder_name
+
+            print(
+                f"[!] Attempting to download full snapshot for \
+                {self.model_id}..."
+            )
+            model_service = ModelService(ModelDownloader())
+
+            snapshot_path = model_service.ensure_hf_snapshot(
+                repo_id=self.model_id,
+                target_dir=local_dir,
+                allow_patterns=[
+                    "*.safetensors",
+                    "model.safetensors.index.json",
+                    "config.json",
+                    "tokenizer.json",
+                    "tokenizer_config.json",
+                ],
+            )
+
+            if snapshot_path:
+                args.model = snapshot_path
+                print(
+                    f"[+] Retrying training with local snapshot at \
+                    {snapshot_path}..."
+                )
+                lora.run(args)
+                print(
+                    f"[✓] Completed after fallback: \
+                    {self.model_id} ({experiment_label})"
+                )
+                return
+
+            print(traceback.format_exc())
         except Exception as e:
             print(f"[!] Error in experiment '{experiment_label}': {e}")
             print(traceback.format_exc())
             # We don't raise here to allow
             # other experiments in the loop to continue
+        finally:
+            # Crucial: clear Metal cache after each run
+            # to free memory for Optuna/next trial
+            print("[Memory] Clearing Metal cache...")
+            mx.metal.clear_cache()

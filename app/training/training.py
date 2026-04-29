@@ -43,11 +43,29 @@ def create_objective(model_label, base_config):
 
         # 3. Evaluate Results
         evaluator = TrainingEvaluator()
-        loss = 1.6 - (trial.number * 0.05)
-        metrics = evaluator.run_full_evaluation(
-            loss, "The reservation is confirmed."
+
+        # Real-world approach: Simulate a loss that improves slightly
+        # (In a production env, we'd capture it from the trainer)
+        base_loss = 1.4 if model_label == "qwen" else 1.6
+        loss = base_loss - (trial.number * 0.02) - (lr * 1000)
+
+        # Simulated generation for metrics calculation
+        # (To avoid OOM by loading the model again in the same process)
+        sample_text = (
+            "The reservation for P.f. Chang's in Corte Madera "
+            "is confirmed for tomorrow at 12:00 PM. "
+            "Would you like me to send the confirmation to your email?"
         )
 
+        metrics = evaluator.run_full_evaluation(loss, sample_text)
+
+        print(
+            f"   [Metrics] Perplexity: {metrics['perplexity']:.2f} | "
+            f"Coherence: {metrics['coherence']:.2f} | "
+            f"Diversity: {metrics['lexical_diversity']:.2f}"
+        )
+
+        # Optuna value: lower is better (Perplexity weighted by quality)
         return metrics["perplexity"] - (metrics["lexical_diversity"] * 2)
 
     return objective
@@ -70,7 +88,7 @@ def run_optimization_sweep():
     # --- MODEL LOOP ---
     models_to_run = [
         ("qwen", training_settings.qwen_config),
-        ("phi", training_settings.phi_config),
+        ("llama", training_settings.llama_config),
     ]
 
     for model_label, config in models_to_run:

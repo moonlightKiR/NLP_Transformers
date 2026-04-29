@@ -30,6 +30,13 @@ class HardwareDetector:
         return "cpu"
 
     @staticmethod
+    def get_total_ram_gb() -> float:
+        """Returns total system RAM in gigabytes."""
+        import psutil
+
+        return psutil.virtual_memory().total / (1024**3)
+
+    @staticmethod
     def is_apple_silicon() -> bool:
         return HardwareDetector.get_device_type() == "mlx"
 

@@ -1,5 +1,5 @@
 from app.models.config import model_settings
-from app.models.constants import PHI_GGUF_NAME, QWEN_GGUF_NAME
+from app.models.constants import LLAMA_GGUF_NAME, QWEN_GGUF_NAME
 from app.models.inference import InferenceService
 from app.models.inference_cpp import InferenceCPPService
 
@@ -14,7 +14,7 @@ class InitialInferenceService:
         self._processor = dialogue_processor
         self._split = test_split
         self._qwen_gguf = model_settings.gguf_dir / QWEN_GGUF_NAME
-        self._phi_gguf = model_settings.gguf_dir / PHI_GGUF_NAME
+        self._llama_gguf = model_settings.gguf_dir / LLAMA_GGUF_NAME
 
     def run_comparative_inference(self):
         """Runs inference tests across different backends for documentation."""
@@ -35,14 +35,14 @@ class InitialInferenceService:
         except Exception as e:
             print(f"[!] QWEN Transformers Backend failed as expected: {e}")
 
-        # Phi Attempt
+        # Llama Attempt
         try:
-            phi_trans = InferenceService(
-                self._phi_gguf, model_settings.phi_tok_path, "phi"
+            llama_trans = InferenceService(
+                self._llama_gguf, model_settings.llama_tok_path, "llama"
             )
-            phi_trans.run_initial_test(self._processor, self._split)
+            llama_trans.run_initial_test(self._processor, self._split)
         except Exception as e:
-            print(f"[!] PHI Transformers Backend failed as expected: {e}")
+            print(f"[!] LLAMA Transformers Backend failed as expected: {e}")
 
         # --- STEP B: Llama-cpp-python (Optimized Backend) ---
         print(
@@ -56,8 +56,8 @@ class InitialInferenceService:
         )
         qwen_cpp.run_initial_test(self._processor, self._split)
 
-        # Phi Optimized
-        phi_cpp = InferenceCPPService(
-            self._phi_gguf, "phi", str(model_settings.phi_tok_path)
+        # Llama Optimized
+        llama_cpp = InferenceCPPService(
+            self._llama_gguf, "llama", str(model_settings.llama_tok_path)
         )
-        phi_cpp.run_initial_test(self._processor, self._split)
+        llama_cpp.run_initial_test(self._processor, self._split)

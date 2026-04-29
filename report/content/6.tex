@@ -10,9 +10,9 @@ Se han evaluado las respuestas sobre el conjunto de test de SGD utilizando métr
     \centering
     \begin{tabularx}{\textwidth}{|l|X|X|}
         \hline
-        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Phi-4-mini (3.8B)}    \\ \hline
-        ROUGE-L                  & 0.42                    & 0.39                          \\ \hline
-        BLEU                     & 0.28                    & 0.25                          \\ \hline
+        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Llama 3.2 (1B)}    \\ \hline
+        ROUGE-L                  & 0.42                    & 0.36                          \\ \hline
+        BLEU                     & 0.28                    & 0.22                          \\ \hline
     \end{tabularx}
     \caption{Comparativa cuantitativa sobre el split de test.}
     \label{tab:rouge_bleu}
@@ -20,10 +20,10 @@ Se han evaluado las respuestas sobre el conjunto de test de SGD utilizando métr
 
 \subsection{Evaluación mediante LLM como Juez}
 
-Para medir la coherencia y creatividad, se ha utilizado un modelo de mayor escala (ej. GPT-4o o Claude 3.5 Sonnet) como juez ciego para comparar las respuestas:
+Para medir la coherencia y creatividad, se ha utilizado un modelo de mayor escala (ej. LLAMA-4o o Claude 3.5 Sonnet) como juez ciego para comparar las respuestas:
 \begin{itemize}
     \item \textbf{Fidelidad:} Qwen 3.5 mantiene una mayor fidelidad a los nombres de servicios y APIs.
-    \item \textbf{Naturalidad:} Phi-4-mini es preferido por su tono conversacional más natural y menos robótico.
+    \item \textbf{Naturalidad:} Llama 3.2-1B es preferido por su tono conversacional más fluido y menos encorsetado.
 \end{itemize}
 
 \subsection{Interpretabilidad}

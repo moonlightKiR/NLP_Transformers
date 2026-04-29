@@ -18,6 +18,8 @@ app/models/downloader.py
 app/models/inference.py
 app/models/inference_cpp.py
 app/models/orchestrator.py
+app/models/trainer_cuda.py
+app/models/trainer_factory.py
 app/models/trainer_mlx.py
 app/training/__init__.py
 app/training/config.py
@@ -25,6 +27,7 @@ app/training/constants.py
 app/training/evaluator.py
 app/training/training.py
 app/training/training_lora.py
+app/utils/hardware.py
 nlp_transformers.egg-info/PKG-INFO
 nlp_transformers.egg-info/SOURCES.txt
 nlp_transformers.egg-info/dependency_links.txt

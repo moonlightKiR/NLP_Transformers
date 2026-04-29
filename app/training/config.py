@@ -4,7 +4,7 @@ from typing import Any, Dict
 from app.training.constants import (
     DEFAULT_ITERS,
     DEFAULT_LEARNING_RATE,
-    PHI_4_MINI,
+    LLAMA_32_1B,
     QWEN_35_2B,
     QWEN_LEARNING_RATE,
     adapters_lora_root,
@@ -26,13 +26,13 @@ class TrainingPhaseConfig:
         }
     )
 
-    phi_config: Dict[str, Any] = field(
+    llama_config: Dict[str, Any] = field(
         default_factory=lambda: {
-            "model": PHI_4_MINI,
+            "model": LLAMA_32_1B,
             "batch_size": 1,
             "learning_rate": DEFAULT_LEARNING_RATE,
             "iters": DEFAULT_ITERS,
-            "adapter_path": str(adapters_lora_root(PHI_4_MINI)),
+            "adapter_path": str(adapters_lora_root(LLAMA_32_1B)),
             "grad_checkpoint": True,
         }
     )

@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from app.models.constants import PHI_TRAIN_ID, QWEN_TRAIN_ID
+from app.models.constants import LLAMA_TRAIN_ID, QWEN_TRAIN_ID
 
 # Model IDs from central constants
 QWEN_35_2B = QWEN_TRAIN_ID
-PHI_4_MINI = PHI_TRAIN_ID
+LLAMA_32_1B = LLAMA_TRAIN_ID
 
 # Directories
 ADAPTERS_ROOT = Path(".adapters")

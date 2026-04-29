@@ -32,7 +32,7 @@ Durante la ejecución, se ha observado y corregido el uso de parámetros obsolet
 
 \subsection{Truncado y Padding}
 
-Se aplica una estrategia de truncado a \textbf{512 tokens} y \textit{padding} dinámico. Esto permite la creación de tensores rectangulares eficientes para el entrenamiento, optimizando el uso de la memoria unificada del sistema.
+Se aplica una estrategia de truncado a \textbf{768 tokens} (optimizado para 18GB de RAM) y \textit{padding} dinámico. Esta reducción desde los 2048 tokens nativos permite la creación de tensores rectangulares eficientes para el entrenamiento, minimizando el riesgo de desbordamiento de memoria (\textit{Out-of-Memory}) en hardware local sin sacrificar la integridad de los diálogos del dataset SGD.
 
 \subsection{Persistencia de Tensores}
 
