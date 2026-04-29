@@ -5,10 +5,9 @@ from app.training.constants import (
     DEFAULT_ITERS,
     DEFAULT_LEARNING_RATE,
     PHI_4_MINI,
-    PHI_ADAPTER_DIR,
     QWEN_35_2B,
-    QWEN_ADAPTER_DIR,
     QWEN_LEARNING_RATE,
+    adapters_lora_root,
 )
 
 
@@ -22,7 +21,7 @@ class TrainingPhaseConfig:
             "batch_size": 1,
             "learning_rate": QWEN_LEARNING_RATE,
             "iters": DEFAULT_ITERS,
-            "adapter_path": str(QWEN_ADAPTER_DIR),
+            "adapter_path": str(adapters_lora_root(QWEN_35_2B)),
             "grad_checkpoint": True,
         }
     )
@@ -33,7 +32,7 @@ class TrainingPhaseConfig:
             "batch_size": 1,
             "learning_rate": DEFAULT_LEARNING_RATE,
             "iters": DEFAULT_ITERS,
-            "adapter_path": str(PHI_ADAPTER_DIR),
+            "adapter_path": str(adapters_lora_root(PHI_4_MINI)),
             "grad_checkpoint": True,
         }
     )

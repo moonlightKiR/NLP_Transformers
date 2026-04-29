@@ -1,4 +1,3 @@
-from app.constants import TRAIN_SPLIT_STRUCTURED_DIR
 from app.converters.mlx_data import MLXDataConverter
 from app.models.trainer_mlx import MLXTrainerService
 from app.training.config import training_settings
@@ -16,7 +15,7 @@ def run_lora_challenge_phase():
 
     # 1. Ensure Data is ready
     converter = MLXDataConverter()
-    converter.convert_split(TRAIN_SPLIT_STRUCTURED_DIR)
+    converter.ensure_train_valid()
 
     # 2. Final Training with Optimized Parameters
     qwen_trainer = MLXTrainerService(training_settings.qwen_config["model"])

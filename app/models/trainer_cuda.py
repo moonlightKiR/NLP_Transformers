@@ -1,3 +1,4 @@
+import os
 from typing import Any, Optional
 
 import torch
@@ -7,6 +8,8 @@ from transformers import (
     BitsAndBytesConfig,
     TrainingArguments,
 )
+
+from app.training.constants import adapters_lora_root
 
 
 class CUDATrainerService:
@@ -63,8 +66,18 @@ class CUDATrainerService:
 
         # 4. Training Arguments
         lr = custom_args.get("learning_rate", 1e-5) if custom_args else 1e-5
+        base_output_dir = (
+            custom_args.get("adapter_path") if custom_args else None
+        )
+        if not base_output_dir:
+            base_output_dir = str(adapters_lora_root(self.model_id))
+
         _training_args = TrainingArguments(
-            output_dir=f".adapters/{self.model_id.split('/')[-1]}_cuda_{experiment_label}",
+            output_dir=str(
+                os.path.join(
+                    base_output_dir, f"cuda_{experiment_label}".strip("_")
+                )
+            ),
             per_device_train_batch_size=1,
             gradient_accumulation_steps=4,
             learning_rate=lr,

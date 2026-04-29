@@ -2,10 +2,10 @@ import os
 
 import optuna
 
-from app.constants import TRAIN_SPLIT_STRUCTURED_DIR
 from app.converters.mlx_data import MLXDataConverter
 from app.models.trainer_factory import TrainerFactory
 from app.training.config import training_settings
+from app.training.constants import adapters_optuna_root
 from app.training.evaluator import TrainingEvaluator
 
 
@@ -29,7 +29,15 @@ def create_objective(model_label, base_config):
         # 2. Run Training (HARDWARE AGNOSTIC via Factory)
         trainer = TrainerFactory.get_trainer(base_config["model"])
         trainer.train(
-            {**base_config, "learning_rate": lr, "rank": rank, "iters": 40},
+            {
+                **base_config,
+                "learning_rate": lr,
+                "rank": rank,
+                "iters": 40,
+                "adapter_path": str(
+                    adapters_optuna_root(base_config["model"])
+                ),
+            },
             experiment_label=f"optuna_{model_label}_trial_{trial.number}",
         )
 
@@ -57,7 +65,7 @@ def run_optimization_sweep():
 
     # Ensure data is ready
     converter = MLXDataConverter()
-    converter.convert_split(TRAIN_SPLIT_STRUCTURED_DIR)
+    converter.ensure_train_valid()
 
     # --- MODEL LOOP ---
     models_to_run = [
@@ -67,9 +75,9 @@ def run_optimization_sweep():
 
     for model_label, config in models_to_run:
         # Check if the optimization was already completed (Trial 2 exists)
-        base_name = config["model"].split("/")[-1]
         last_trial_path = (
-            f".adapters/{base_name}_lora/optuna_{model_label}_trial_2"
+            adapters_optuna_root(config["model"])
+            / f"optuna_{model_label}_trial_2"
         )
 
         if os.path.exists(

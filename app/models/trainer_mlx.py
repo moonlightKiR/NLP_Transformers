@@ -4,6 +4,7 @@ from typing import Any, Optional
 from mlx_lm import lora
 
 from app.config import settings
+from app.training.constants import adapters_lora_root
 
 
 class MLXTrainerService:
@@ -21,8 +22,7 @@ class MLXTrainerService:
         parser = lora.build_parser()
 
         # Determine the base adapter path
-        base_adapter_name = self.model_id.split("/")[-1]
-        default_adapter_path = f".adapters/{base_adapter_name}_lora"
+        default_adapter_path = str(adapters_lora_root(self.model_id))
 
         cli_args = [
             "--model",
