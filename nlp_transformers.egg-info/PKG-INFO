@@ -18,4 +18,5 @@ Requires-Dist: peft>=0.10.0
 Requires-Dist: evaluate>=0.4.1
 Requires-Dist: mlx-lm>=0.12.0
 Requires-Dist: python-dotenv>=1.2.2
+Requires-Dist: optuna>=4.8.0
 Dynamic: license-file

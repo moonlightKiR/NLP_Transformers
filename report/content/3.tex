@@ -1,52 +1,43 @@
 \section{Preprocesado}
 \subsection{Descarga de datos y modelos}
 
-Para garantizar la reproducibilidad y facilitar el despliegue del proyecto, se ha implementado un sistema automatizado de gestión de recursos siguiendo principios de diseño \texttt{SOLID} y \texttt{Clean Code}. Este sistema se encarga de la descarga y organización tanto del dataset como de los modelos de lenguaje.
+Para garantizar la reproducibilidad y facilitar el despliegue del proyecto, se ha implementado un sistema automatizado de gestión de recursos siguiendo principios de diseño \texttt{SOLID}.
+
+\subsubsection{Autenticación y Seguridad (.env)}
+
+Debido a que modelos de última generación requieren autenticación para su descarga, se ha integrado la librería \texttt{python-dotenv}. El sistema carga automáticamente un \texttt{HF\_TOKEN} desde un archivo \texttt{.env}, permitiendo que las librerías de Hugging Face gestionen las descargas de forma transparente.
 
 \subsubsection{Arquitectura del Sistema de Ingestión}
 
-La arquitectura se ha desacoplado para que cada dominio (datasets y modelos) gestione sus propios recursos:
-
 \begin{itemize}
-    \item \textbf{Gestión de Modelos (\texttt{.models/}):} Se ha centralizado la descarga de modelos en un directorio oculto en la raíz del proyecto. La lógica está encapsulada en \texttt{app/models/}, permitiendo descargar archivos GGUF y configuraciones de tokenizadores de forma independiente.
-    
-\lstinputlisting[language=Python, firstline=4, lastline=20, caption=Lógica de descarga de modelos en app/models/downloader.py]{app/models/downloader.py}
-
-    \item \textbf{Gestión de Datasets (\texttt{app/dataset/}):} Se encarga de la clonación del repositorio de datos mediante Git, manteniendo una interfaz abstracta para asegurar la integridad de los datos originales.
-
-    \item \textbf{Conversores Especializados (\texttt{app/converters/}):} Módulos dedicados a la transformación de formatos, incluyendo la conversión de PDF a Markdown y el formateo de diálogos de SGD al formato estándar de mensajes (\textit{role/content}).
+    \item \textbf{Gestión de Modelos (\texttt{.models/}):} Se centraliza la descarga de GGUFs y Tokenizers.
+    \item \textbf{Estructuración de Diálogos (JSON Chat Format):} Se transforman los archivos de SGD a un formato intermedio de mensajes (\textit{role/content}). El sistema evita conversiones redundantes mediante chequeos de integridad.
 \end{itemize}
 
-\subsubsection{Flujo de Ejecución}
+\subsubsection{Gestión del Almacenamiento y Caché (Hugging Face Hub)}
 
-El punto de entrada principal coordina tres etapas secuenciales: Ingesta, Estructuración y Preprocesado.
-
-\lstinputlisting[language=Python, firstline=11, lastline=62, caption=Orquestación del setup completo en app/main.py]{app/main.py}
-
-\subsection{Estructuración de Diálogos (JSON Chat Format)}
-
-Antes de la tokenización, se ha introducido una fase de \textbf{Estructuración}. Los archivos originales del dataset SGD se transforman a un formato de JSON simplificado donde cada diálogo es una lista de mensajes con roles \texttt{user} y \texttt{assistant}. Estos archivos se almacenan en \texttt{.data/structured/}, creando un formato intermedio universal.
-
-\lstinputlisting[language=Python, firstline=1, lastline=30, caption=Conversor de formato de diálogo en app/converters/dialogue\_format.py]{app/converters/dialogue_format.py}
+Para optimizar el uso del disco y evitar descargas redundantes de archivos de gran tamaño (9GB-10GB por modelo), el sistema utiliza el almacenamiento centralizado de \texttt{huggingface\_hub}. En el entorno de desarrollo (macOS), los modelos en formato \textit{safetensors} se gestionan automáticamente en la ruta del sistema:
+\begin{center}
+    \texttt{\textasciitilde/.cache/huggingface/hub}
+\end{center}
+Esta arquitectura permite que el entrenamiento detecte instantáneamente si un recurso ya está disponible localmente, realizando únicamente una comprobación de integridad (\textit{ETags}) antes de proceder, lo que reduce drásticamente el tiempo de preparación en ejecuciones sucesivas.
 
 \subsection{Tokenización y Chat Templates}
 
-La tokenización convierte el texto en secuencias numéricas. El preprocesado aplica \textbf{Chat Templates} de Hugging Face para inyectar tokens de control específicos de cada modelo. Para maximizar el rendimiento en hardware Apple Silicon, el proceso utiliza el backend \texttt{MPS} (Metal Performance Shaders).
+Se ha implementado el uso de \textbf{Strict Chat Templates}. El sistema utiliza el método \texttt{apply\_chat\_template} para asegurar que el modelo recibe los tokens de control exactos (\texttt{<|im\_start|>}, \texttt{<|user|>}, etc.).
 
-\lstinputlisting[language=Python, firstline=107, lastline=126, caption=Inyección de Chat Templates y uso de MPS en app/dataset/processor.py]{app/dataset/processor.py}
+\subsubsection{Adaptación a Versiones Modernas de Transformers}
+
+Durante la ejecución, se ha observado y corregido el uso de parámetros obsoletos siguiendo las advertencias del sistema. Un ejemplo relevante es la transición de \texttt{torch\_dtype} hacia el nuevo estándar \texttt{dtype} en los cargadores de modelos.
 
 \subsection{Truncado y Padding}
 
-Se aplica una estrategia de truncado (512 tokens) y \textit{padding} para uniformizar el tamaño de los lotes, permitiendo la creación de tensores rectangulares eficientes para el entrenamiento.
+Se aplica una estrategia de truncado a \textbf{512 tokens} y \textit{padding} dinámico. Esto permite la creación de tensores rectangulares eficientes para el entrenamiento, optimizando el uso de la memoria unificada del sistema.
 
 \subsection{Persistencia de Tensores}
 
-El sistema guarda los resultados finales como archivos de tensores de PyTorch (\texttt{.pt}) dentro de \texttt{.data/preprocessed/}, organizados por modelo y partición (\texttt{train} y \texttt{test}). 
+El sistema guarda los resultados como archivos de tensores de PyTorch (\texttt{.pt}) dentro de \texttt{.data/preprocessed/}, organizados jerárquicamente por modelo y partición (\texttt{train} y \texttt{test}). 
 
-\lstinputlisting[language=Python, firstline=153, lastline=200, caption=Gestión de persistencia por particiones en app/dataset/processor.py]{app/dataset/processor.py}
+\subsection{Manejo de Secuencias Largas}
 
-\subsection{Manejo Secuencias Largas}
-
-Se han seleccionado modelos con soluciones nativas para contextos extensos. Además, se ha implementado una \textbf{ventana de contexto} que limita el procesamiento a los turnos más recientes del diálogo.
-
-\lstinputlisting[language=Python, firstline=34, lastline=58, caption=Delegación del formateo y ventana de contexto en app/dataset/processor.py]{app/dataset/processor.py}
+Para diálogos extensos, se ha implementado una estrategia de \textbf{ventana deslizante}. El sistema prioriza los turnos más recientes del diálogo, garantizando que el modelo mantenga la información relevante para generar la respuesta actual sin exceder su ventana de contexto nativa.

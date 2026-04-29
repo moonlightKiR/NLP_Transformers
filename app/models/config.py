@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from app.models.constants import (
-    GEMMA_TOKENIZER_DIR_NAME,
+    PHI_TOKENIZER_DIR_NAME,
     QWEN_TOKENIZER_DIR_NAME,
 )
 
@@ -30,9 +30,15 @@ class ModelConfig:
         return self.tokenizers_dir / QWEN_TOKENIZER_DIR_NAME
 
     @property
+    def phi_tok_path(self):
+        """Returns the local path for the Phi tokenizer."""
+        return self.tokenizers_dir / PHI_TOKENIZER_DIR_NAME
+
+    @property
     def gemma_tok_path(self):
-        """Returns the local path for the Gemma tokenizer."""
-        return self.tokenizers_dir / GEMMA_TOKENIZER_DIR_NAME
+        """DEPRECATED: Returns the local path for the Phi tokenizer
+        for backward compatibility."""
+        return self.phi_tok_path
 
 
 # Global configuration instance for models

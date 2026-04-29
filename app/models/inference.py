@@ -36,7 +36,7 @@ class InferenceService:
             self.model_path.parent,
             gguf_file=self.model_path.name,
             device_map="auto",
-            torch_dtype=torch.float16,
+            dtype=torch.float16,
             trust_remote_code=True,
         )
         print(f"[✓] {self.model_label} loaded successfully.")

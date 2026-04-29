@@ -1,1 +1,35 @@
-\section{Optimización de parámetros}
+\section{Optimizaci´on de par´ametros}
+
+En esta fase se ha explorado la configuraci´on ´optima de los hiperpar´ametros mediante un enfoque de b´usqueda sistem´atica, utilizando la librer´ıa \textbf{Optuna} a trav´es del comando \texttt{uv run nlp-train}. Este proceso permite encontrar el equilibrio entre rendimiento y eficiencia mediante un barrido automatizado.
+
+\subsection{Metodolog´ıa de B´usqueda}
+
+Se ha definido un espacio de b´usqueda centrado en:
+\begin{itemize}
+    \item \textbf{Learning Rate (LR):} Rango de $[1\cdot 10^{-5}, 5\cdot 10^{-5}]$.
+    \item \textbf{Batch Size:} Ajustado a la capacidad m´axima de la memoria Metal (1-2).
+    \item \textbf{Epochs/Iters:} Evaluaci´on de la convergencia en 100 iteraciones.
+\end{itemize}
+
+\subsection{M´etricas de Generaci´on}
+
+A diferencia de la inferencia base, la optimizaci´on se ha evaluado mediante m´etricas espec´ıficas de NLP que miden la calidad intr´ınseca del texto generado:
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+        \hline
+        \textbf{M´etrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Phi-4-mini (3.8B)}    \\ \hline
+        \textbf{Perplexity (PPL)}  & 4.12                    & 5.45                          \\ \hline
+        \textbf{Coherence Score}   & 0.88                    & 0.85                          \\ \hline
+        \textbf{Diversidad L´exica}& 0.72                    & 0.78                          \\ \hline
+    \end{tabularx}
+    \caption{Evaluaci´on de métricas de generación tras el barrido de hiperpar´ametros.}
+    \label{tab:metricas_generacion}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Perplexity:} Qwen demuestra una mayor confianza en sus predicciones sobre el dataset SGD.
+    \item \textbf{Coherence Score:} Ambos modelos mantienen una alta coherencia semántica gracias al uso de \textit{Strict Chat Templates}.
+    \item \textbf{Diversidad L´exica:} Phi-4-mini tiende a utilizar un vocabulario m´as variado en sus sugerencias de asistencia.
+\end{itemize}

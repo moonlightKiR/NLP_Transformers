@@ -8,9 +8,15 @@ class MLXDataConverter:
 
     def convert_split(self, split_name):
         """Merges individual structured JSONs into
-        a single train/test.jsonl file."""
+        a single train/test.jsonl file. Skips if already exists."""
         input_dir = settings.structured_path / split_name
         output_file = settings.structured_path / f"{split_name}.jsonl"
+
+        if output_file.exists():
+            print(
+                f"[-] {output_file.name} already exists. Skipping conversion."
+            )
+            return output_file
 
         if not input_dir.exists():
             print(f"[!] Input directory not found: {input_dir}")
