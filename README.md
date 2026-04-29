@@ -1,91 +1,59 @@
 # Practica 2: Transformers en NLP
 
-Este proyecto forma parte de la asignatura de Deep Learning y se centra en la exploracion, implementacion y evaluacion comparativa de modelos basados en la arquitectura Transformer para tareas de Procesamiento de Lenguaje Natural (NLP).
+Este proyecto se centra en la implementación y evaluación comparativa de modelos Transformer (Qwen 3.5 y Phi-4) para la generación de diálogos, optimizado para ejecutarse en hardware local y entornos de alto rendimiento.
 
 ## Objectives
 - Implement and fine-tune Transformer models for Dialogue Response Generation.
-- Perform a comparative evaluation between Gemma 4 E2B-it and Qwen 3.5-9B architectures.
-- Use the SGD (Schema-Guided Dialogue) dataset from Google.
-- Apply software engineering principles (SOLID, Clean Code).
+- Perform a comparative evaluation between **Qwen 3.5-2B** and **Phi-4-mini** architectures.
+- Apply software engineering principles (**SOLID**, **Clean Code**).
+- **Cross-Platform Portability**: Transparent execution on Apple Silicon (MPS) and NVIDIA (CUDA).
 
 ## Tech Stack
-- Language: Python 3.12+
-- Package Manager: uv
-- Models: Gemma 4 E2B-it, Qwen 3.5-9B (GGUF)
-- Hardware Acceleration: Apple Silicon MPS (Metal Performance Shaders)
-- Code Quality:
-  - pre-commit: Hook automation.
-  - ruff: Fast linting and formatting (PEP 8).
+- **Language**: Python 3.12+
+- **Core**: uv, Transformers, PyTorch.
+- **Fine-Tuning**: MLX (Apple), PEFT/BitsAndBytes (NVIDIA).
+- **Optimization**: Optuna.
+- **Hardware Acceleration**: Apple Silicon GPU (Metal) & NVIDIA CUDA.
 
 ## Project Structure
 ```text
 ├── app/
-│   ├── dataset/          # Data downloading and processing logic
-│   ├── models/           # Models logic, constants and config
-│   │   ├── config.py
-│   │   ├── constants.py
-│   │   ├── downloader.py
-│   │   └── __init__.py
-│   ├── config.py         # General project configuration
-│   ├── constants.py      # Global project constants
-│   └── main.py           # Entry point (Orchestrator)
-├── tests/                # Unit and integration tests
-├── .data/                # Local datasets and preprocessed tensors (ignored)
-├── .models/              # Local GGUF models and tokenizers (ignored)
-├── report/               # LaTeX report and documentation
-│   └── app -> ../app     # Symlink to app for report listings
-├── .pre-commit-config.yaml
-├── pyproject.toml        # Dependencies and tool configuration
+│   ├── dataset/          # Data ingestion and SGD processing
+│   ├── models/           # Models logic and Trainer abstraction
+│   │   ├── trainer_factory.py  # Factory Pattern for hardware selection
+│   │   ├── trainer_mlx.py      # Apple Silicon specific logic
+│   │   ├── trainer_cuda.py     # NVIDIA/Colab specific logic
+│   │   ├── orchestrator.py     # Inference management
+│   │   └── config.py
+│   ├── utils/
+│   │   └── hardware.py   # Automatic Device Detector (MPS/CUDA/CPU)
+│   ├── training/         # Section 5 & 7 training logic
+│   └── main.py           # Pipeline Entry point
+├── .adapters/            # LoRA weights and Optuna trials (ignored)
+├── .data/                # Local datasets (ignored)
+├── .models/              # Local GGUF models (ignored)
+├── report/               # LaTeX documentation
 └── README.md
 ```
 
-## Installation and Usage
-
-1. Install dependencies:
-   ```bash
-   uv sync
-   ```
-
-2. Setup quality hooks:
-   ```bash
-   uv run pre-commit install
-   ```
-
-3. Download and Preprocess Resources:
-   ```bash
-   uv run nlp-t
-   ```
-   Note: The system will automatically:
-   - Fetch the SGD dataset and GGUF models.
-   - Setup local tokenizers for offline use.
-   - Perform bulk preprocessing (Tokenization, Truncation, Padding).
-   - Apply long sequence handling strategies.
-   - Save processed tensors as .pt files using Apple Silicon GPU acceleration.
-
 ## Advanced Features
 
-### Hardware Optimization
-The pipeline is optimized for macOS (M1/M2/M3) using the MPS backend, offloading intensive tokenization and tensor operations to the GPU.
+### Hardware-Agnostic Portability (NEW)
+The system features an automatic **Hardware Detector** and a **Trainer Factory**. 
+- **macOS**: Uses the high-performance **MLX** backend native to Apple Silicon.
+- **Linux/Colab**: Automatically switches to the **PyTorch/CUDA** stack with **QLoRA (4-bit)** to maximize NVIDIA T4/A100 efficiency.
+This allows moving the project between a local Mac and Google Colab without modifying any code.
 
-### Long Sequence Handling
-To manage extensive dialogue histories, the system combines architectural strengths with data strategies:
-- Native Support: Utilization of Hybrid Attention (Gemma 4) and Gated Delta Networks (Qwen 3.5) for massive context windows.
-- Context Windowing: Automated turn-truncation in the preprocessing phase to prioritize the most recent and relevant conversational context.
+### Systematic Optimization
+- **Optuna Integration**: Automated hyperparameter sweep (Learning Rate, Rank) evaluating Perplexity, Coherence, and Diversity.
+- **Strict Chat Templates**: Uses official model tokenizers to ensure the exact prompt format (`<|im_start|>`) used during original training.
 
-## Testing
-The project uses structured tests in the `tests/` directory (mirroring the `app/` structure). To run specific tests using `uv`:
+## Usage
 ```bash
-# Test inference
-uv run python tests/models/test_inference.py
-
-# Test data processing
-uv run python tests/dataset/test_processor.py
-```
-
-## Code Standards
-The project follows strict typing and style rules. You can validate the code manually with:
-```bash
-uv run pre-commit run --all-files
+uv sync                      # Install dependencies
+uv run nlp-main              # Initial inference & Preprocessing
+uv run nlp-train             # Section 5: Optuna Optimization
+uv run nlp-train-lora        # Section 7: Final LoRA Training
 ```
 
 ## Maintainer

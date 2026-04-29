@@ -4,7 +4,7 @@ import optuna
 
 from app.constants import TRAIN_SPLIT_STRUCTURED_DIR
 from app.converters.mlx_data import MLXDataConverter
-from app.models.trainer_mlx import MLXTrainerService
+from app.models.trainer_factory import TrainerFactory
 from app.training.config import training_settings
 from app.training.evaluator import TrainingEvaluator
 
@@ -20,14 +20,14 @@ def create_objective(model_label, base_config):
         rank = trial.suggest_categorical("rank", [8, 16])
 
         print(
-            f"\n[Optuna - {model_label.upper()}] \
+            f"\n[Optuna - {model_label.upper()}]\
             Trial {trial.number}: \
             LR={lr:.2e}, \
             Rank={rank}"
         )
 
-        # 2. Run Training
-        trainer = MLXTrainerService(base_config["model"])
+        # 2. Run Training (HARDWARE AGNOSTIC via Factory)
+        trainer = TrainerFactory.get_trainer(base_config["model"])
         trainer.train(
             {**base_config, "learning_rate": lr, "rank": rank, "iters": 40},
             experiment_label=f"optuna_{model_label}_trial_{trial.number}",
@@ -76,8 +76,8 @@ def run_optimization_sweep():
             os.path.join(last_trial_path, "adapters.safetensors")
         ):
             print(
-                f"\n[-] Optimization for {model_label.upper()} \
-                already exists. Skipping study."
+                f"\n[-] Optimization for {model_label.upper()} already exists.\
+                Skipping study."
             )
             continue
 

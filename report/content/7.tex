@@ -1,14 +1,14 @@
-\section{Extensi´on opcional (extra desaf´ıo): LoRA}
+\section{Extensión opcional (extra desafío): LoRA}
 
-Como mejora avanzada en la optimizaci´on de par´ametros, se ha implementado la t´ecnica \textbf{LoRA (Low-Rank Adaptation)} ejecutada mediante el comando \texttt{uv run nlp-train-lora}. Esta metodolog´ıa permite un ajuste fino extremadamente eficiente al congelar los pesos originales del modelo e inyectar matrices de bajo rango entrenables.
+Como mejora avanzada en la optimización de parámetros, se ha implementado la técnica \textbf{LoRA (Low-Rank Adaptation)} ejecutada mediante el comando \texttt{uv run nlp-train-lora}. Esta metodología permite un ajuste fino extremadamente eficiente al congelar los pesos originales del modelo e inyectar matrices de bajo rango entrenables.
 
-\subsection{Implementaci´on con MLX}
+\subsection{Implementación con MLX}
 
-Se ha utilizado la librer´ıa \textbf{MLX} de Apple, optimizada para hardware ARM. El proceso se ha configurado con los siguientes par´ametros:
+Se ha utilizado la librería \textbf{MLX} de Apple, optimizada para hardware ARM. El proceso se ha configurado con los siguientes parámetros:
 \begin{itemize}
     \item \textbf{Rank ($r$):} 8.
     \item \textbf{Alpha:} 16.
-    \item \textbf{Capas Objetivo:} Proyecciones lineales en el mecanismo de atenci´on.
+    \item \textbf{Capas Objetivo:} Proyecciones lineales en el mecanismo de atención.
 \end{itemize}
 
 \subsection{Eficiencia y Resultados}
@@ -17,8 +17,8 @@ Se ha utilizado la librer´ıa \textbf{MLX} de Apple, optimizada para hardware A
     \centering
     \begin{tabularx}{\textwidth}{|l|X|X|}
         \hline
-        \textbf{M´etrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Phi-4-mini (3.8B)}    \\ \hline
-        Par´ametros Entrenables  & 5.60M (0.29\%)          & 5.76M (0.15\%)                \\ \hline
+        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Phi-4-mini (3.8B)}    \\ \hline
+        Parámetros Entrenables  & 5.60M (0.29\%)          & 5.76M (0.15\%)                \\ \hline
         Tiempo de Entrenamiento  & 10.5 min                & 14.2 min                      \\ \hline
         Estatus Final           & Completado              & Completado                    \\ \hline
     \end{tabularx}
@@ -26,6 +26,6 @@ Se ha utilizado la librer´ıa \textbf{MLX} de Apple, optimizada para hardware A
     \label{tab:lora_final}
 \end{table}
 
-\subsection{Conclusi´on del Desaf´ıo}
+\subsection{Conclusión del Desafío}
 
-La implementaci´on de LoRA ha demostrado ser la estrategia m´as eficaz para adaptar modelos de gran escala en entornos con recursos de memoria limitados (18GB), logrando una reducci´on de la \textit{Loss} significativa sin degradar el conocimiento base del modelo pre-entrenado.
+La implementación de LoRA ha demostrado ser la estrategia más eficaz para adaptar modelos de gran escala en entornos con recursos de memoria limitados (18GB), logrando una reducción de la \textit{Loss} significativa sin degradar el conocimiento base del modelo pre-entrenado.

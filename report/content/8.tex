@@ -1,0 +1,21 @@
+\section{Extra: Arquitectura Portable y Escalabilidad}
+
+Como valor añadido a la implementación técnica, se ha dise˜ñado una arquitectura \textbf{Hardware Agnostic} que garantiza la portabilidad del proyecto entre diferentes entornos de computación de alto rendimiento.
+
+\subsection{Detección Automática de Backend}
+
+Se ha implementado un servicio de detección (\texttt{HardwareDetector}) que identifica en tiempo de ejecución el silicio disponible. Esto permite que el mismo código se ejecute de forma nativa en:
+\begin{itemize}
+    \item \textbf{Apple Silicon:} Utilizando el framework \textbf{MLX} para maximizar el uso de la memoria unificada.
+    \item \textbf{NVIDIA CUDA (Colab/Cloud):} Utilizando el stack de \textbf{PyTorch + PEFT}, activando automáticamente la cuantización \textbf{QLoRA de 4 bits} mediante \textit{BitsAndBytes} para entornos con VRAM limitada como la NVIDIA T4.
+\end{itemize}
+
+\subsection{Patrón Factory para Entrenamiento}
+
+Siguiendo los principios \textbf{SOLID}, la instanciación de los motores de entrenamiento se gestiona mediante un \textbf{TrainerFactory}.
+
+\lstinputlisting[language=Python, firstline=5, lastline=22, caption=Implementación del Factory Pattern para portabilidad en app/models/trainer\_factory.py]{app/models/trainer_factory.py}
+
+\subsection{Impacto en el Ciclo de Desarrollo}
+
+Esta mejora permite un flujo de trabajo híbrido donde la estructuración y pruebas rápidas se realizan en hardware local (Mac), mientras que los barridos de optimización masivos pueden lanzarse en infraestructuras \textit{cloud} sin necesidad de refactorizar el núcleo del software, demostrando una alta escalabilidad y madurez en el diseño de la solución.

@@ -1,16 +1,16 @@
-\section{Evaluaci´on Avanzada}
+\section{Evaluación Avanzada}
 
-Se realiza una comparativa profunda de ambos modelos tras la fase de optimizaci´on, considerando tanto el rendimiento cuantitativo como la calidad cualitativa.
+Se realiza una comparativa profunda de ambos modelos tras la fase de optimización, considerando tanto el rendimiento cuantitativo como la calidad cualitativa.
 
 \subsection{Rendimiento Cuantitativo (ROUGE/BLEU)}
 
-Se han evaluado las respuestas sobre el conjunto de test de SGD utilizando m´etricas de fidelidad de texto:
+Se han evaluado las respuestas sobre el conjunto de test de SGD utilizando métricas de fidelidad de texto:
 
 \begin{table}[H]
     \centering
     \begin{tabularx}{\textwidth}{|l|X|X|}
         \hline
-        \textbf{M´etrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Phi-4-mini (3.8B)}    \\ \hline
+        \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Phi-4-mini (3.8B)}    \\ \hline
         ROUGE-L                  & 0.42                    & 0.39                          \\ \hline
         BLEU                     & 0.28                    & 0.25                          \\ \hline
     \end{tabularx}
@@ -18,14 +18,14 @@ Se han evaluado las respuestas sobre el conjunto de test de SGD utilizando m´et
     \label{tab:rouge_bleu}
 \end{table}
 
-\subsection{Evaluaci´on mediante LLM como Juez}
+\subsection{Evaluación mediante LLM como Juez}
 
 Para medir la coherencia y creatividad, se ha utilizado un modelo de mayor escala (ej. GPT-4o o Claude 3.5 Sonnet) como juez ciego para comparar las respuestas:
 \begin{itemize}
     \item \textbf{Fidelidad:} Qwen 3.5 mantiene una mayor fidelidad a los nombres de servicios y APIs.
-    \item \textbf{Naturalidad:} Phi-4-mini es preferido por su tono conversacional m´as natural y menos rob´otico.
+    \item \textbf{Naturalidad:} Phi-4-mini es preferido por su tono conversacional más natural y menos robótico.
 \end{itemize}
 
 \subsection{Interpretabilidad}
 
-Se ha analizado el peso de los tokens mediante mapas de atenci´on, observando que ambos modelos centran correctamente la activaci´on en los nombres de servicios (\textit{restaurants}, \textit{hotels}) y en los par´ametros de reserva (\textit{time}, \textit{location}), validando que la arquitectura Transformer est´a procesando las entidades clave del diálogo.
+Se ha analizado el peso de los tokens mediante mapas de atención, observando que ambos modelos centran correctamente la activación en los nombres de servicios (\textit{restaurants}, \textit{hotels}) y en los parámetros de reserva (\textit{time}, \textit{location}), validando que la arquitectura Transformer está procesando las entidades clave del diálogo.
