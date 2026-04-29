@@ -46,3 +46,7 @@ A diferencia de la inferencia base, la optimización se ha evaluado mediante mé
     \item \textbf{Número de trials:} Un número reducido de pruebas sirve para observar tendencias, pero no garantiza un óptimo global; si se dispone de más recursos, conviene aumentar trials o refinar el rango alrededor de la mejor configuración encontrada.
     \item \textbf{Trazabilidad:} La separación de experimentos por modelo en \texttt{.adapters/<model>/optuna} facilita comparar arquitecturas y auditar qué configuración produjo cada resultado.
 \end{itemize}
+
+\subsection{Selección final del modelo}
+
+Tras evaluar varias alternativas (Qwen, Phi y otros), la implementación final de la fase de inferencia y evaluación utiliza el modelo Llama disponible en \texttt{report/app/}. Este modelo fue seleccionado por su compatibilidad con el pipeline GGUF/llama-cpp en el entorno Apple Silicon y por facilitar la integración con las plantillas estrictas usadas durante la evaluación.
