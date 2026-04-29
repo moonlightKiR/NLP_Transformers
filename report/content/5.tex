@@ -11,6 +11,8 @@ Se ha definido un espacio de búsqueda centrado en:
     \item \textbf{Epochs/Iters:} Evaluación de la convergencia en 100 iteraciones.
 \end{itemize}
 
+Adicionalmente, para evitar errores de \textit{out-of-memory} en MLX/Metal durante la evaluación, se limita el número de batches de validación (\texttt{val\_batches}). En esta práctica se utiliza una validación derivada del conjunto de test (20\%) como señal rápida de convergencia, manteniendo el resto del test para evaluación final.
+
 \subsection{Métricas de Generación}
 
 A diferencia de la inferencia base, la optimización se ha evaluado mediante métricas específicas de NLP que miden la calidad intrínseca del texto generado:
@@ -32,4 +34,15 @@ A diferencia de la inferencia base, la optimización se ha evaluado mediante mé
     \item \textbf{Perplexity:} Qwen demuestra una mayor confianza en sus predicciones sobre el dataset SGD.
     \item \textbf{Coherence Score:} Ambos modelos mantienen una alta coherencia semántica gracias al uso de \textit{Strict Chat Templates}.
     \item \textbf{Diversidad Léxica:} Phi-4-mini tiende a utilizar un vocabulario más variado en sus sugerencias de asistencia.
+\end{itemize}
+
+\subsection{Conclusiones}
+
+\begin{itemize}
+    \item \textbf{Búsqueda sistemática:} Optuna permite explorar hiperparámetros de forma reproducible, reduciendo el sesgo de selección manual y acelerando la identificación de configuraciones prometedoras.
+    \item \textbf{Cuello de botella en validación:} En Apple Silicon (MLX/Metal) la evaluación puede ser más costosa que el entrenamiento; validar demasiados batches incrementa el consumo de memoria unificada y puede provocar \textit{out-of-memory}. Por ello se limita \texttt{val\_batches} para mantener estabilidad.
+    \item \textbf{Validación y test:} Se utiliza un 20\% del conjunto de test como validación para obtener una señal rápida de convergencia durante el barrido, reservando el 80\% restante para evaluación final. Esta decisión debe considerarse una limitación metodológica.
+    \item \textbf{Impacto de hiperparámetros:} Los parámetros con mayor influencia suelen ser el \textit{learning rate} y el \textit{rank} de LoRA: LR alto tiende a inestabilidad/peor generalización, mientras que ranks altos aumentan capacidad de adaptación a costa de mayor coste y riesgo de sobreajuste.
+    \item \textbf{Número de trials:} Un número reducido de pruebas sirve para observar tendencias, pero no garantiza un óptimo global; si se dispone de más recursos, conviene aumentar trials o refinar el rango alrededor de la mejor configuración encontrada.
+    \item \textbf{Trazabilidad:} La separación de experimentos por modelo en \texttt{.adapters/<model>/optuna} facilita comparar arquitecturas y auditar qué configuración produjo cada resultado.
 \end{itemize}

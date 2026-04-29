@@ -1,4 +1,5 @@
 import os
+import traceback
 from typing import Any, Optional
 
 from mlx_lm import lora
@@ -63,6 +64,7 @@ class MLXTrainerService:
             "learning_rate": 1e-5,
             "steps_per_report": 10,
             "steps_per_eval": 200,
+            "val_batches": 10,
             "save_every": 50,
             "max_seq_length": 2048,
             "grad_accumulation_steps": 1,
@@ -136,5 +138,6 @@ class MLXTrainerService:
             print(f"[✓] Completed: {self.model_id} ({experiment_label})")
         except Exception as e:
             print(f"[!] Error in experiment '{experiment_label}': {e}")
+            print(traceback.format_exc())
             # We don't raise here to allow
             # other experiments in the loop to continue
