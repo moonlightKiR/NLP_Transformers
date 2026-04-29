@@ -21,9 +21,9 @@ def create_objective(model_label, base_config):
 
         print(
             f"\n[Optuna - {model_label.upper()}] \
-                Trial {trial.number}: \
-                    LR={lr:.2e}, \
-                        Rank={rank}"
+            Trial {trial.number}: \
+            LR={lr:.2e}, \
+            Rank={rank}"
         )
 
         # 2. Run Training
@@ -52,7 +52,7 @@ def run_optimization_sweep():
     """
     print(
         "=== NLP Transformers: Section 5 - \
-            Dual Model Optimization (Optuna) ==="
+        Dual Model Optimization (Optuna) ==="
     )
 
     # Ensure data is ready
@@ -77,7 +77,7 @@ def run_optimization_sweep():
         ):
             print(
                 f"\n[-] Optimization for {model_label.upper()} \
-                    already exists. Skipping study."
+                already exists. Skipping study."
             )
             continue
 
@@ -87,7 +87,7 @@ def run_optimization_sweep():
 
         print(
             f"\n[✓] {model_label.upper()} optimization complete. \
-                Best Params: {study.best_params}"
+            Best Params: {study.best_params}"
         )
 
     print("\n" + "=" * 50)

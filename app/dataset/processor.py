@@ -41,7 +41,7 @@ class StructuringService:
         json_files = sorted(list(input_dir.glob("dialogues_*.json")))
         print(
             f"[+] Structuring {len(json_files)} files: {split_name} \
-                -> structured/{split_name}/"
+            -> structured/{split_name}/"
         )
 
         for file_path in json_files:
@@ -139,7 +139,7 @@ class PreprocessingService:
 
         print(
             f"[+] Loading tokenizer for {self._model_label}:\
-                {self._tokenizer_name}..."
+            {self._tokenizer_name}..."
         )
         raw_tokenizer = AutoTokenizer.from_pretrained(
             self._tokenizer_name, trust_remote_code=True
@@ -170,7 +170,7 @@ class PreprocessingService:
         if not pending_files:
             print(
                 f"[-] Tensors for '{self._model_label}/{split_name}' \
-                    already exist."
+                already exist."
             )
             return
 
@@ -179,7 +179,7 @@ class PreprocessingService:
 
         print(
             f"[+] Tokenizing {len(pending_files)} files \
-                for '{self._model_label}'..."
+            for '{self._model_label}'..."
         )
         for i, file_path in enumerate(pending_files, 1):
             conversations = self._processor.load_json(file_path)
@@ -191,10 +191,10 @@ class PreprocessingService:
             if i % 20 == 0 or i == len(pending_files):
                 print(
                     f"    - [{i}/{len(pending_files)}] \
-                        Processed: {file_path.name}"
+                    Processed: {file_path.name}"
                 )
 
         print(
             f"[✓] Tokenization for '{self._model_label}/{split_name}' \
-                completed."
+            completed."
         )

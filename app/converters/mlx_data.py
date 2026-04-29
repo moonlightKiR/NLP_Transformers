@@ -25,7 +25,7 @@ class MLXDataConverter:
         json_files = list(input_dir.glob("dialogues_*.json"))
         print(
             f"[+] Converting {len(json_files)} files to MLX format \
-                ({split_name}.jsonl)..."
+            ({split_name}.jsonl)..."
         )
 
         with open(output_file, "w", encoding="utf-8") as outfile:

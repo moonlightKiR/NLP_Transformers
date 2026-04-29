@@ -24,7 +24,7 @@ class InferenceService:
         """Loads the tokenizer and the GGUF model into memory."""
         print(
             f"[+] Loading tokenizer for {self.model_label} \
-                from: {self.tokenizer_path.name}"
+            from: {self.tokenizer_path.name}"
         )
         self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_path)
 

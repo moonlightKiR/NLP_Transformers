@@ -24,7 +24,7 @@ class InferenceCPPService:
         """Loads the GGUF model into memory using Llama-cpp."""
         print(
             f"[+] Loading GGUF model {self.model_label} \
-                (Backend: Metal/MPS)..."
+            (Backend: Metal/MPS)..."
         )
         self.model = Llama(
             model_path=str(self.model_path),
@@ -45,7 +45,7 @@ class InferenceCPPService:
 
         print(
             f"[+] Generating response with {self.model_label} \
-                (strict template)..."
+            (strict template)..."
         )
 
         start_time = time.time()
@@ -87,7 +87,7 @@ class InferenceCPPService:
 
             print(
                 f"\n--- {self.model_label.upper()} \
-                    Inference Test (Strict Templates) ---"
+                Inference Test (Strict Templates) ---"
             )
             print("[Context]")
             for msg in sample_context:

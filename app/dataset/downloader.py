@@ -20,7 +20,7 @@ class GitDownloader(Downloader):
         if destination.exists() and any(destination.iterdir()):
             print(
                 f"[-] Dataset already exists at: {destination}. \
-                    Skipping download."
+                Skipping download."
             )
             return
 
@@ -97,7 +97,7 @@ class DatasetService:
             if self._verifier and manifest_path:
                 print(
                     f"[+] Verifying data integrity for: \
-                        {target_path.name}..."
+                    {target_path.name}..."
                 )
                 current_manifest = self._verifier.generate_manifest(
                     target_path
