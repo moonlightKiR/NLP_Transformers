@@ -1,10 +1,10 @@
 # Practica 2: Transformers en NLP
 
-Este proyecto se centra en la implementación y evaluación comparativa de modelos Transformer (Qwen 3.5 y Phi-4) para la generación de diálogos, optimizado para ejecutarse en hardware local y entornos de alto rendimiento.
+Este proyecto se centra en la implementación y evaluación comparativa de modelos Transformer (Qwen 3.5 y Llama 3.2) para la generación de diálogos, optimizado para ejecutarse en hardware local y entornos de alto rendimiento.
 
 ## Objectives
 - Implement and fine-tune Transformer models for Dialogue Response Generation.
-- Perform a comparative evaluation between **Qwen 3.5-2B** and **Phi-4-mini** architectures.
+- Perform a comparative evaluation between **Qwen 3.5-2B** and **Llama 3.2-1B** architectures.
 - Apply software engineering principles (**SOLID**, **Clean Code**).
 - **Cross-Platform Portability**: Transparent execution on Apple Silicon (MPS) and NVIDIA (CUDA).
 
