@@ -6,10 +6,10 @@ Se ha realizado una comparativa entre la librería estándar \texttt{transformer
 
 \subsubsection{Limitaciones de la Librería Estándar (Transformers)}
 
-Los intentos de inferencia con la librería estándar fallaron en ambos modelos, documentando los siguientes desafíos técnicos:
+Los intentos de inferencia con la librería estándar arrojaron resultados dispares, permitiendo documentar el estado actual de soporte para GGUF:
 \begin{itemize}
-    \item \textbf{Qwen 3.5:} El cargador de GGUF de \texttt{transformers} no reconoce aún la arquitectura específica \texttt{qwen35}, lo que impide la carga directa de los pesos cuantizados.
-    \item \textbf{Llama 3.2-1B:} El modelo falló inicialmente en \texttt{transformers} debido a una gestión ineficiente de la memoria (\textit{device\_map}) al intentar cargar el GGUF sin la cuantización nativa del backend optimizado.
+    \item \textbf{Qwen 3.5:} El cargador de GGUF de \texttt{transformers} no reconoce aún la arquitectura específica \texttt{qwen35}, lo que impide la carga directa de los pesos cuantizados en esta versión.
+    \item \textbf{Llama 3.2-1B:} A diferencia de versiones anteriores, este modelo demostró una **compatibilidad nativa completa**, logrando realizar la inferencia sin errores, aunque con un proceso de carga de tensores más lento que el backend especializado.
 \end{itemize}
 
 \subsubsection{Solución: Llama-cpp-python y Strict Templates}

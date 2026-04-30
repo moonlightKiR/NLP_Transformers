@@ -65,6 +65,11 @@ class ChatTemplateService:
         """
         # apply_chat_template ensures we use
         # <|im_start|>, <|user|>, etc., correctly
-        return self.tokenizer.apply_chat_template(
+        formatted = self.tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
         )
+        # Clean up BOS token if it's already there to avoid duplicate warnings
+        # in some backends (like llama-cpp-python)
+        if formatted.startswith("<|begin_of_text|>"):
+            formatted = formatted[len("<|begin_of_text|>") :]
+        return formatted

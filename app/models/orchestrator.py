@@ -42,7 +42,7 @@ class InitialInferenceService:
             )
             llama_trans.run_initial_test(self._processor, self._split)
         except Exception as e:
-            print(f"[!] LLAMA Transformers Backend failed as expected: {e}")
+            print(f"[!] LLAMA Transformers Backend failed: {e}")
 
         # --- STEP B: Llama-cpp-python (Optimized Backend) ---
         print(

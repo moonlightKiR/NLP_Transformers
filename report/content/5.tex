@@ -1,14 +1,14 @@
 \section{Optimización de parámetros}
 
-En esta fase se ha explorado la configuración óptima de los hiperparámetros mediante un enfoque de búsqueda sistemática, utilizando la librería \textbf{Optuna} a través del comando \texttt{uv run nlp-train}. Este proceso permite encontrar el equilibrio entre rendimiento y eficiencia mediante un barrido automatizado.
+En esta fase se ha explorado la configuración óptima de los hiperparámetros mediante un enfoque de búsqueda sistemática, utilizando la librería \textbf{Optuna} a través del comando \texttt{uv run nlp-train}. Para garantizar la estabilidad del hardware (18GB RAM) y permitir múltiples ejecuciones rápidas, se ha utilizado la técnica \textbf{LoRA} como motor de entrenamiento durante todos los ensayos (\textit{trials}).
 
 \subsection{Metodología de Búsqueda}
 
-Se ha definido un espacio de búsqueda centrado en:
+Se ha definido un espacio de búsqueda centrado en los parámetros críticos de LoRA:
 \begin{itemize}
     \item \textbf{Learning Rate (LR):} Rango de $[1\cdot 10^{-5}, 5\cdot 10^{-5}]$.
-    \item \textbf{Batch Size:} Ajustado a la capacidad máxima de la memoria Metal (1-2).
-    \item \textbf{Epochs/Iters:} Evaluación de la convergencia en 100 iteraciones.
+    \item \textbf{LoRA Rank ($r$):} Comparativa entre rangos bajos (8) y medios (16).
+    \item \textbf{Iters:} Ensayos rápidos de 40 iteraciones para observar tendencias de convergencia.
 \end{itemize}
 
 Adicionalmente, para evitar errores de \textit{out-of-memory} en MLX/Metal durante la evaluación, se limita el número de batches de validación (\texttt{val\_batches}). En esta práctica se utiliza una validación derivada del conjunto de test (20\%) como señal rápida de convergencia, manteniendo el resto del test para evaluación final.

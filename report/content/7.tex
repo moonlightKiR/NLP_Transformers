@@ -1,10 +1,10 @@
-\section{Extensión opcional (extra desafío): LoRA}
+\section{Extensión opcional (extra desafío): LoRA Final}
 
-Como mejora avanzada en la optimización de parámetros, se ha implementado la técnica \textbf{LoRA (Low-Rank Adaptation)} ejecutada mediante el comando \texttt{uv run nlp-train-lora}. Esta metodología permite un ajuste fino extremadamente eficiente al congelar los pesos originales del modelo e inyectar matrices de bajo rango entrenables.
+Tras identificar los mejores hiperparámetros en la fase de optimización, se procede a la ejecución del \textbf{Desafío LoRA Final} mediante el comando \texttt{uv run nlp-train-lora}. Esta fase representa la implementación de "producción", donde se aplica un entrenamiento extendido para consolidar el conocimiento del modelo.
 
-\subsection{Implementación con MLX}
+\subsection{Implementación de "Producción" con MLX}
 
-Se ha utilizado la librería \textbf{MLX} de Apple, optimizada para hardware ARM. El proceso se ha configurado con los siguientes parámetros:
+A diferencia de los ensayos rápidos de Optuna, este proceso utiliza los valores ganadores (ej. $r=8$ para Llama 3.2-1B) y se configura con un mayor número de iteraciones para maximizar la calidad de las respuestas.
 \begin{itemize}
     \item \textbf{Rank ($r$):} 8.
     \item \textbf{Alpha:} 16.

@@ -8,6 +8,7 @@ app/main.py
 app/converters/__init__.py
 app/converters/dialogue_format.py
 app/converters/mlx_data.py
+app/converters/templates.py
 app/dataset/__init__.py
 app/dataset/downloader.py
 app/dataset/processor.py
