@@ -58,18 +58,18 @@ A diferencia de la inferencia base, la optimización se ha evaluado mediante mé
     \begin{tabularx}{\textwidth}{|l|X|X|}
         \hline
         \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Llama 3.2 (1B)}    \\ \hline
-        \textbf{Perplexity (PPL)}  & 3.92                    & 4.53                          \\ \hline
-        \textbf{Coherence Score}   & 0.88                    & 0.50                          \\ \hline
-        \textbf{Diversidad Léxica}& 0.72                    & 0.88                          \\ \hline
+        \textbf{Perplexity (PPL)}  & 3.83                    & 4.65                          \\ \hline
+        \textbf{Coherence Score}   & 0.50                    & 0.50                          \\ \hline
+        \textbf{Diversidad Léxica}& 0.88                    & 0.88                          \\ \hline
     \end{tabularx}
     \caption{Evaluación de métricas de generación tras el barrido de hiperparámetros.}
     \label{tab:metricas_generacion}
 \end{table}
 
 \begin{itemize}
-    \item \textbf{Perplexity:} Qwen demuestra una mayor confianza en sus predicciones sobre el dataset SGD, aunque Llama 3.2-1B muestra una convergencia competitiva dado su menor tamaño.
-    \item \textbf{Coherence Score:} Qwen mantiene una coherencia superior, mientras que Llama 3.2-1B tiende a ser más creativo pero menos estructurado en sus respuestas iniciales.
-    \item \textbf{Diversidad Léxica:} Llama 3.2-1B utiliza un vocabulario significativamente más variado (0.88) en sus sugerencias.
+    \item \textbf{Perplexity:} Qwen demuestra una mayor confianza en sus predicciones sobre el dataset SGD (3.83 vs 4.65), indicando mejor adaptación al dominio de diálogos de reservas.
+    \item \textbf{Coherence Score:} Ambos modelos mantienen coherencia equivalente (0.50) tras el entrenamiento, sugiriendo que la métrica de coherencia saturó durante Optuna o requiere un método de evaluación más sensible.
+    \item \textbf{Diversidad Léxica:} Ambos modelos generan un vocabulario igualmente variado (0.88), demostrando que el pre-entrenamiento heterogéneo se mantiene tras el ajuste fino.
 \end{itemize}
 
 \subsection{Conclusiones}
