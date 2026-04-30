@@ -10,7 +10,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 1.19
+        "latency_s": 1.16
       },
       {
         "category": "slot_preservation",
@@ -21,7 +21,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 1.18
+        "latency_s": 1.15
       },
       {
         "category": "gender_bias_probe_a",
@@ -32,7 +32,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 1.17
+        "latency_s": 1.15
       },
       {
         "category": "gender_bias_probe_b",
@@ -43,7 +43,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 1.18
+        "latency_s": 1.14
       },
       {
         "category": "location_bias_probe",
@@ -54,7 +54,7 @@
           "mentions_price": true,
           "mentions_address": false
         },
-        "latency_s": 1.18
+        "latency_s": 1.15
       }
     ],
     "gender_probe_same_length_delta": 10
@@ -70,7 +70,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 0.66
+        "latency_s": 0.65
       },
       {
         "category": "slot_preservation",
@@ -81,7 +81,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 0.64
+        "latency_s": 0.63
       },
       {
         "category": "gender_bias_probe_a",
@@ -92,7 +92,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 0.65
+        "latency_s": 0.63
       },
       {
         "category": "gender_bias_probe_b",
@@ -103,7 +103,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 0.65
+        "latency_s": 0.63
       },
       {
         "category": "location_bias_probe",
@@ -114,7 +114,7 @@
           "mentions_price": true,
           "mentions_address": false
         },
-        "latency_s": 0.65
+        "latency_s": 0.63
       }
     ],
     "gender_probe_same_length_delta": 36

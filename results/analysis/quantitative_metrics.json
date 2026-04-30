@@ -1,13 +1,13 @@
 {
   "qwen": {
-    "bleu": 0.0124,
-    "rouge1": 0.1612,
-    "rougeL": 0.1465,
-    "distinct_1": 0.5058,
-    "distinct_2": 0.7842,
-    "slot_recall": 0.2353,
-    "avg_tokens_per_second": 55.5,
-    "avg_latency_s": 0.83,
+    "bleu": 0.0123,
+    "rouge1": 0.1389,
+    "rougeL": 0.13,
+    "distinct_1": 0.486,
+    "distinct_2": 0.7925,
+    "slot_recall": 0.1667,
+    "avg_tokens_per_second": 58.19,
+    "avg_latency_s": 0.84,
     "samples": [
       {
         "reference": "I don't mind, even a bit.",
@@ -38,35 +38,35 @@
         "prediction": "That sounds great! I hope you have a wonderful stay in Chi-town. If you need any more help with your trip—like finding local attractions, restaurants, or transportation tips—feel free to ask!"
       },
       {
-        "reference": "I am glad I could help. Have a nice day!",
-        "prediction": "You're very welcome! I hope you have a wonderful time in Paris. Safe travels!"
+        "reference": "Can I help you with anything else?",
+        "prediction": "You're very welcome! I hope you have a wonderful time in Paris. If you need any other assistance with your stay, such as local recommendations or tips, feel free to ask. Safe travels!"
       },
       {
-        "reference": "Please confirm to book a house for 2 in Portland from March 8th to March 9th.",
-        "prediction": "Got it! You want to check in on **next Friday**.\n\nTo proceed with the booking, I need a few more details:\n1.  **Check-out date:** What day do you want to leave?\n2.  **Guests:** You mentioned \"two persons,\" but did you mean **2 guests** or **2 people** (which usually implies 2 guests)?\n3.  **Preferred arrival time:** Do you have a specific time in mind"
+        "reference": "I am glad I could help. Have a nice day!",
+        "prediction": "You're welcome! If you have any more questions or need further assistance, feel free to ask. Have a great day! 😊"
+      },
+      {
+        "reference": "Okay. What is your expected check-in date?",
+        "prediction": "I cannot directly book the property for you. I am an AI assistant and do not have access to booking systems, payment processing, or the ability to reserve real estate.\n\nHowever, since I have identified the property at **1150 Northwest 9th Avenue** in Portland with a 4.1 rating, you can proceed with booking it yourself using one of the following methods:\n\n1.  **Direct Booking**: Visit the property's website or contact the owner"
       },
       {
         "reference": "Have a great day.",
-        "prediction": "You're welcome! Have a great day."
+        "prediction": "You're welcome! Have a great time in Portland."
       },
       {
-        "reference": "Your booking is successfully done.",
-        "prediction": "Great! I've confirmed your booking details:\n\n*   **Location:** Atlanta, GA\n*   **Address:** 1065 Peachtree Street Northeast\n*   **Dates:** March 10th – March 12th\n*   **Guests:** 1 person\n\nYou can proceed with booking this house through the platform where you found it. If you need any further assistance, such as understanding the amenities or getting a confirmation email, feel free"
-      },
-      {
-        "reference": "It's my honor to help you.",
-        "prediction": "You're welcome! If you ever need assistance with anything else, feel free to ask. Have a great day! 😊"
+        "reference": "I decided to check in on 10th of march and check out is 12th of this month and book the house for 1 people.",
+        "prediction": "I can't directly book the house for you, but I can help you find a booking platform or contact the property directly. Here are a few options:\n\n1. **Check the website**: Visit the property's official website (101 Andrew Young International Boulevard) to see if they have an online booking system.\n2. **Contact the property**: Call or email the owner/property manager at +1 404-745-5000"
       }
     ]
   },
   "llama": {
-    "bleu": 0.0168,
-    "rouge1": 0.1763,
-    "rougeL": 0.1689,
-    "distinct_1": 0.305,
-    "distinct_2": 0.5178,
-    "slot_recall": 0.0588,
-    "avg_tokens_per_second": 95.62,
+    "bleu": 0.0172,
+    "rouge1": 0.1699,
+    "rougeL": 0.1557,
+    "distinct_1": 0.3249,
+    "distinct_2": 0.5314,
+    "slot_recall": 0.1111,
+    "avg_tokens_per_second": 99.95,
     "avg_latency_s": 0.38,
     "samples": [
       {
@@ -98,24 +98,24 @@
         "prediction": "I'm glad I could help you find a potential place to stay in Chi-town. If you need any more assistance or have any other questions, feel free to ask. Have a great day and good luck with your search!"
       },
       {
-        "reference": "I am glad I could help. Have a nice day!",
-        "prediction": "It was a pleasure helping you find a house in Paris. If you need anything else in the future, don't hesitate to contact me. Have a great day and a wonderful trip to Paris!"
+        "reference": "Can I help you with anything else?",
+        "prediction": "You're welcome. I'm glad I could help you find a great place to stay in Paris. If you need any more assistance or have any other questions, feel free to ask. Have a great trip to Paris!"
       },
       {
-        "reference": "Please confirm to book a house for 2 in Portland from March 8th to March 9th.",
-        "prediction": "I'm sorry I can't provide you with the house's availability. However, I can suggest that you can try searching for the house on websites like Booking.com, Expedia, or HomeAway, which allow you to filter search results by check-in and check-out dates."
+        "reference": "I am glad I could help. Have a nice day!",
+        "prediction": "It was a pleasure assisting you. Have a great day!"
+      },
+      {
+        "reference": "Okay. What is your expected check-in date?",
+        "prediction": "I'm glad I could help you find a suitable house in Portland.\n\nTo confirm, you would like to book the house located at 1150 Northwest 9th Avenue with rating 4.1 for a period of 9 days.\n\nBefore making a booking, I would like to confirm a few details with you:\n\n* Are you planning to stay in the house alone or with someone else?\n* Do you have any specific dates in mind for your stay?\n* Are you willing"
       },
       {
         "reference": "Have a great day.",
-        "prediction": "It was a pleasure assisting you. Have a great day!"
+        "prediction": "It was a pleasure assisting you. Have a great day and I'll be here if you need anything else in the future."
       },
       {
-        "reference": "Your booking is successfully done.",
-        "prediction": "I'm glad I could assist you with finding a suitable house in Atlanta. If you need any more help or have any other questions, feel free to ask.\n\nBy the way, I'm glad I could help you find a great place to stay. I hope you have a wonderful time in Atlanta and enjoy your stay at the house I recommended. If you need anything else, don't hesitate to ask."
-      },
-      {
-        "reference": "It's my honor to help you.",
-        "prediction": "It was a pleasure assisting you. Have a great day!"
+        "reference": "I decided to check in on 10th of march and check out is 12th of this month and book the house for 1 people.",
+        "prediction": "I cannot provide you with the phone number of a specific house. I can give you some tips on how to find a house that meets your needs. Would you like some suggestions?"
       }
     ]
   }

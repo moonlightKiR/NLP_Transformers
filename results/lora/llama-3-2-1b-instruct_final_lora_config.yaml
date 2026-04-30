@@ -3,12 +3,12 @@ batch_size: 1
 data: /Users/guille/Documents/LASALLE/MASTER/DeepLearning/NLP_Transformers/.data/structured
 grad_checkpoint: true
 iters: 200
-learning_rate: 4.003007808930792e-05
+learning_rate: 2.3791108184906434e-05
 lora_parameters:
   dropout: 0.0
-  rank: 8
-  scale: 16.0
-max_seq_length: 384
+  rank: 16
+  scale: 32.0
+max_seq_length: 320
 model: meta-llama/Llama-3.2-1B-Instruct
 num_layers: 16
 save_every: 100
