@@ -39,6 +39,10 @@ def main():
         os.environ["HUGGINGFACE_HUB_TOKEN"] = os.environ["HF_TOKEN"]
         print("[+] Loaded HF_TOKEN from .env into HUGGINGFACE_HUB_TOKEN")
 
+    from app.utils.logger import setup_logger
+
+    setup_logger("nlp-main")
+
     # 1. Resource Ingestion
     print("=== NLP Transformers: Resource Ingestion ===")
     dataset_service = DatasetService(

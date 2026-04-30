@@ -407,6 +407,10 @@ class ComparativeAnalysisService:
 
 
 def run_full_analysis():
+    from app.utils.logger import setup_logger
+
+    setup_logger("nlp-analysis")
+
     print("\n=== NLP Transformers: Comparative Analysis ===")
     service = ComparativeAnalysisService()
     service.run_quantitative_benchmark()

@@ -134,6 +134,10 @@ class Visualizer:
 
 def run_visualizations():
     """CLI Entry point to generate all project visualizations."""
+    from app.utils.logger import setup_logger
+
+    setup_logger("nlp-viz")
+
     print("\n=== NLP Transformers: Generating Visualizations ===")
     viz = Visualizer()
 

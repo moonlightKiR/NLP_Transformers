@@ -84,6 +84,10 @@ def run_optimization_sweep():
     Main entry point for Section 5:
     Hyperparameter Optimization for both models.
     """
+    from app.utils.logger import setup_logger
+
+    setup_logger("nlp-train")
+
     print(
         "=== NLP Transformers: Section 5 - "
         "Dual Model Optimization (Optuna) ==="
