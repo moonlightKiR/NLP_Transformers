@@ -12,3 +12,6 @@ evaluate>=0.4.1
 mlx-lm>=0.12.0
 python-dotenv>=1.2.2
 optuna>=4.8.0
+matplotlib>=3.10.9
+seaborn>=0.13.2
+captum>=0.9.0

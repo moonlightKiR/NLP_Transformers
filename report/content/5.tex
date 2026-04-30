@@ -2,6 +2,14 @@
 
 En esta fase se ha explorado la configuración óptima de los hiperparámetros mediante un enfoque de búsqueda sistemática, utilizando la librería \textbf{Optuna} a través del comando \texttt{uv run nlp-train}. Para garantizar la estabilidad del hardware (18GB RAM) y permitir múltiples ejecuciones rápidas, se ha utilizado la técnica \textbf{LoRA} como motor de entrenamiento durante todos los ensayos (\textit{trials}).
 
+\subsection{Aislamiento de Procesos y Persistencia}
+
+Un desafío técnico crítico detectado durante el barrido de Optuna fue la acumulación de fragmentos de memoria en la caché de Metal, provocando errores de \textit{Insufficient Memory} a partir del segundo ensayo. Para solventarlo, se han implementado dos mejoras de ingeniería:
+\begin{itemize}
+    \item \textbf{Bucle de Entrenamiento Aislado:} Cada \textit{trial} se lanza como un subproceso independiente. Esto garantiza que el sistema operativo recupere el 100\% de la memoria de la GPU al finalizar cada experimento, permitiendo que el siguiente comience con un estado "limpio".
+    \item \textbf{Persistencia vía SQLite:} Los resultados de los estudios se almacenan en una base de datos local (\texttt{optuna\_<model>.db}), permitiendo la trazabilidad y la reanudación de experimentos interrumpidos sin pérdida de datos.
+\end{itemize}
+
 \subsection{Metodología de Búsqueda}
 
 Se ha definido un espacio de búsqueda centrado en los parámetros críticos de LoRA:
