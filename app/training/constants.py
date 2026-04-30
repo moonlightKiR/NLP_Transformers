@@ -30,7 +30,7 @@ def adapters_optuna_root(model_id: str) -> Path:
 
 
 # Default Hyperparameters
-DEFAULT_ITERS = 100
+DEFAULT_ITERS = 200
 DEFAULT_BATCH_SIZE = 1
 DEFAULT_LEARNING_RATE = 1e-5
 QWEN_LEARNING_RATE = 2e-5
