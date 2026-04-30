@@ -2,3 +2,4 @@
 nlp-main = app.main:main
 nlp-train = app.training.training:run_optimization_sweep
 nlp-train-lora = app.training.training_lora:run_lora_challenge_phase
+nlp-viz = app.utils.visualization:run_visualizations

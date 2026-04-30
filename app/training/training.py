@@ -20,10 +20,10 @@ def create_objective(model_label, base_config):
         rank = trial.suggest_categorical("rank", [8, 16])
 
         print(
-            f"\n[Optuna - {model_label.upper()}]\
-            Trial {trial.number}: \
-            LR={lr:.2e}, \
-            Rank={rank}"
+            f"\n[Optuna - {model_label.upper()}] "
+            f"Trial {trial.number}: "
+            f"LR={lr:.2e}, "
+            f"Rank={rank}"
         )
 
         # 2. Run Training (HARDWARE AGNOSTIC via Factory)
@@ -77,8 +77,8 @@ def run_optimization_sweep():
     Hyperparameter Optimization for both models.
     """
     print(
-        "=== NLP Transformers: Section 5 - \
-        Dual Model Optimization (Optuna) ==="
+        "=== NLP Transformers: Section 5 - "
+        "Dual Model Optimization (Optuna) ==="
     )
 
     # Ensure data is ready
@@ -102,18 +102,31 @@ def run_optimization_sweep():
             os.path.join(last_trial_path, "adapters.safetensors")
         ):
             print(
-                f"\n[-] Optimization for {model_label.upper()} already exists.\
-                Skipping study."
+                f"\n[-] Optimization for "
+                f"{model_label.upper()} already exists. "
+                f"Skipping study."
             )
             continue
 
         print(f"\n>>> Starting Optimization for {model_label.upper()}...")
-        study = optuna.create_study(direction="minimize")
+
+        # Use SQLite for persistence and to allow visualization later
+        db_dir = "results/optuna"
+        os.makedirs(db_dir, exist_ok=True)
+        db_path = os.path.join(db_dir, f"optuna_{model_label}.db")
+
+        study = optuna.create_study(
+            study_name=f"optimization_{model_label}",
+            storage=f"sqlite:///{db_path}",
+            load_if_exists=True,
+            direction="minimize",
+        )
+
         study.optimize(create_objective(model_label, config), n_trials=3)
 
         print(
-            f"\n[✓] {model_label.upper()} optimization complete. \
-            Best Params: {study.best_params}"
+            f"\n[✓] {model_label.upper()} optimization complete. "
+            f"Best Params: {study.best_params}"
         )
 
     print("\n" + "=" * 50)

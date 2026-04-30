@@ -29,7 +29,10 @@ Este proyecto se centra en la implementación y evaluación comparativa de model
 │   │   └── hardware.py   # Automatic Device Detector (MPS/CUDA/CPU)
 │   ├── training/         # Section 5 & 7 training logic
 │   └── main.py           # Pipeline Entry point
-├── .adapters/            # LoRA weights and Optuna trials (ignored)
+├── results/              # Persistent metadata (tracked by Git)
+│   ├── optuna/           # SQLite databases with trial history
+│   ├── lora/             # YAML configuration traces for each experiment
+├── .adapters/            # LoRA weights (ignored)
 ├── .data/                # Local datasets (ignored)
 ├── .models/              # Local GGUF models (ignored)
 ├── report/               # LaTeX documentation
@@ -38,21 +41,27 @@ Este proyecto se centra en la implementación y evaluación comparativa de model
 
 ## Advanced Features
 
-### Hardware-Agnostic Portability (NEW)
+### Hardware-Agnostic Portability
 The system features an automatic **Hardware Detector** and a **Trainer Factory**. 
-- **macOS**: Uses the high-performance **MLX** backend native to Apple Silicon.
-- **Linux/Colab**: Automatically switches to the **PyTorch/CUDA** stack with **QLoRA (4-bit)** to maximize NVIDIA T4/A100 efficiency.
-This allows moving the project between a local Mac and Google Colab without modifying any code.
+- **macOS**: Uses the **MLX** backend with **isolated subprocess execution** to ensure 100% GPU memory reclamation between trials.
+- **Linux/Colab**: Automatically switches to **PyTorch/CUDA** with **QLoRA (4-bit)**.
 
-### Systematic Optimization
-- **Optuna Integration**: Automated hyperparameter sweep (Learning Rate, Rank) evaluating Perplexity, Coherence, and Diversity.
-- **Strict Chat Templates**: Uses official model tokenizers to ensure the exact prompt format (`<|im_start|>`) used during original training.
+### Systematic Optimization & Traceability
+- **Optuna Persistence**: Study results are saved in SQLite databases under `results/optuna/`.
+- **Config Traces**: Every training run saves a YAML snapshot in `results/lora/` for full reproducibility.
+- **Strict Chat Templates**: Ensures exact prompt formatting for Llama 3.2 and Qwen 3.5.
+
+### Technical Visualization
+Integrated visualization suite for:
+- **Attention Maps**: Heatmaps of self-attention weights to analyze model interpretability.
+- **Optimization History**: Plots of hyperparameter convergence from Optuna trials.
 
 ## Usage
 ```bash
 uv sync                      # Install dependencies
 uv run nlp-main              # Initial inference & Preprocessing
-uv run nlp-train             # Section 5: Optuna Optimization
+uv run nlp-train             # Section 5: Optuna Optimization (Persistence in results/)
+uv run nlp-viz               # Generate Attention Maps & Optuna Plots
 uv run nlp-train-lora        # Section 7: Final LoRA Training
 ```
 

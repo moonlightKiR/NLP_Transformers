@@ -1,9 +1,11 @@
+import gc
 import os
-import traceback
+import subprocess
+import sys
 from typing import Any, Optional
 
 import mlx.core as mx
-from mlx_lm import lora
+import yaml
 
 from app.config import settings
 from app.training.constants import adapters_lora_root
@@ -23,93 +25,81 @@ class MLXTrainerService:
         """Configures Metal cache limits to prevent system instability."""
         if HardwareDetector.get_device_type() == "mlx":
             total_ram = HardwareDetector.get_total_ram_gb()
-            # Reserve 6GB for the OS, use 70% of the rest for MLX cache
-            safe_limit = max(4, int((total_ram - 6) * 0.7))
+            # For 18GB RAM, be very specific.
+            # We want to leave enough room for the model + activations
+            # but limit the "slack" cache that MLX keeps.
+            reserved = 8.0  # Increase system reservation to 8GB
+            safe_limit = max(2, int((total_ram - reserved) * 0.5))
             print(
                 f"[Memory] Setting Metal cache limit to {safe_limit}GB "
-                f"(Total: {int(total_ram)}GB, Reserved for OS: 6GB)"
+                f"(Total: {int(total_ram)}GB, Reserved: {reserved}GB)"
             )
-            mx.metal.set_cache_limit(safe_limit * 1024 * 1024 * 1024)
+            # Use non-deprecated API
+            mx.set_cache_limit(safe_limit * 1024 * 1024 * 1024)
 
-    def _prepare_args(self, custom_args: Optional[dict[str, Any]] = None):
+    def _prepare_config(
+        self,
+        custom_args: Optional[dict[str, Any]] = None,
+        experiment_label: str = "",
+    ):
         """
-        Creates a complete argument object by simulating CLI arguments.
+        Creates a dictionary for the YAML configuration file.
         """
-        parser = lora.build_parser()
-
         # Determine the base adapter path
         default_adapter_path = str(adapters_lora_root(self.model_id))
-
-        cli_args = [
-            "--model",
-            self.model_id,
-            "--train",
-            "--data",
-            str(settings.structured_path),
-            "--adapter-path",
-            default_adapter_path,
-        ]
-
-        if custom_args:
-            for key, value in custom_args.items():
-                # Special handling for lora_parameters keys if passed flat
-                if key in ["rank", "scale", "dropout"]:
-                    continue  # Will be handled in the defaults
-
-                flag = "--" + key.replace("_", "-")
-                if isinstance(value, bool):
-                    if value and flag not in cli_args:
-                        cli_args.append(flag)
-                else:
-                    # Update if already exists, else append
-                    if flag in cli_args:
-                        idx = cli_args.index(flag)
-                        cli_args[idx + 1] = str(value)
-                    else:
-                        cli_args.extend([flag, str(value)])
-
-        args = parser.parse_args(cli_args)
+        if experiment_label:
+            default_adapter_path = os.path.join(
+                default_adapter_path, experiment_label
+            )
 
         # Standard defaults optimized for 18GB RAM
-        defaults = {
-            "num_layers": 16,
+        config = {
+            "model": self.model_id,
+            "train": True,
+            "data": str(settings.structured_path),
+            "adapter_path": default_adapter_path,
             "batch_size": 1,
             "iters": 100,
             "learning_rate": 1e-5,
             "steps_per_report": 10,
             "steps_per_eval": 200,
-            "val_batches": 5,  # Reduced to save memory during eval
-            "save_every": 50,
-            "max_seq_length": 768,  # Reduced from 2048 to prevent OOM
-            "grad_accumulation_steps": 1,
-            "seed": 0,
-            "fine_tune_type": "lora",
-            "optimizer": "adam",
-            "lr_schedule": None,
-            "optimizer_config": {},
-            "mask_prompt": False,
+            "val_batches": 1,
+            "save_every": 100,
+            "max_seq_length": 384,
             "grad_checkpoint": True,
+            "num_layers": 16,
+            "lora_parameters": {
+                "rank": 8,
+                "scale": 16.0,
+                "dropout": 0.0,
+            },
         }
 
-        for key, value in defaults.items():
-            if getattr(args, key, None) is None:
-                setattr(args, key, value)
-
-        # Handle LoRA Rank/Scale overrides from custom_args
-        rank = 8
-        scale = 20.0
+        # Handle custom overrides
         if custom_args:
-            rank = custom_args.get("rank", 8)
-            scale = custom_args.get("scale", 20.0)
+            for key, value in custom_args.items():
+                if key == "rank":
+                    config["lora_parameters"]["rank"] = value
+                    # Keep scale = 2.0 * rank for stability
+                    # (equivalent to alpha in other frameworks)
+                    config["lora_parameters"]["scale"] = float(2 * value)
+                elif key == "scale":
+                    config["lora_parameters"]["scale"] = float(value)
+                elif key == "lora_layers":
+                    config["num_layers"] = value
+                elif key in config:
+                    config[key] = value
+                elif key == "adapter_path":
+                    # If adapter_path is provided
+                    # we still want to append the experiment_label
+                    if experiment_label:
+                        config["adapter_path"] = os.path.join(
+                            value, experiment_label
+                        )
+                    else:
+                        config["adapter_path"] = value
 
-        if getattr(args, "lora_parameters", None) is None:
-            args.lora_parameters = {
-                "rank": rank,
-                "scale": scale,
-                "dropout": 0.0,
-            }
-
-        return args
+        return config
 
     def train(
         self,
@@ -117,92 +107,74 @@ class MLXTrainerService:
         experiment_label: str = "",
     ):
         """
-        Orchestrates the training process with experiment tracking.
+        Orchestrates the training process using a SUBPROCESS and a YAML config.
+        This ensures memory reclamation and correct parameter passing.
         """
-        args = self._prepare_args(custom_args)
+        gc.collect()
+        # Use non-deprecated API
+        mx.clear_cache()
 
-        # If an experiment label is provided, append it to the adapter path
-        if experiment_label:
-            args.adapter_path = os.path.join(
-                args.adapter_path, experiment_label
-            )
+        # Build Config
+        train_config = self._prepare_config(custom_args, experiment_label)
 
-        adapter_file = os.path.join(args.adapter_path, "adapters.safetensors")
+        adapter_path = train_config["adapter_path"]
+        adapter_file = os.path.join(adapter_path, "adapters.safetensors")
+
         if os.path.exists(adapter_file):
             print(
-                f"[-] Experiment '{experiment_label}'\
-                already exists at {args.adapter_path}. Skipping."
+                f"[-] Experiment '{experiment_label}' "
+                f"already exists. Skipping."
             )
             return
 
-        print(
-            f"\n--- Starting MLX Fine-Tuning:\
-            {self.model_id} [{experiment_label}] ---"
-        )
-        print(
-            f"[+] LR: {args.learning_rate}\
-            Batch: {args.batch_size}\
-            Rank: {args.lora_parameters['rank']}\
-            SeqLen: {args.max_seq_length}"
-        )
+        # Write temporary YAML config
+        config_path = f"config_{experiment_label}.yaml"
+        with open(config_path, "w") as f:
+            yaml.dump(train_config, f)
 
-        os.makedirs(args.adapter_path, exist_ok=True)
+        # Build CLI command using the recommended entry point
+        cli_command = [
+            sys.executable,
+            "-m",
+            "mlx_lm",
+            "lora",
+            "--config",
+            config_path,
+        ]
+
+        print(
+            f"\n>>> [SUBPROCESS START] Fine-Tuning: "
+            f"{self.model_id} [{experiment_label}]"
+        )
+        print(f"[Config saved to: {config_path}]")
 
         try:
-            lora.run(args)
-            print(f"[✓] Completed: {self.model_id} ({experiment_label})")
-        except FileNotFoundError as e:
-            # MLX raises FileNotFoundError when no safetensors are found
-            print(f"[!] FileNotFoundError during training: {e}")
+            # Run the training in a separate process
+            subprocess.run(cli_command, check=True)
+            print(f"[✓] [SUBPROCESS END] Completed: {experiment_label}")
 
-            # Generic fallback:
-            # download full HF snapshot into .models/hf_models/
-            from app.models.config import model_settings
-            from app.models.downloader import ModelDownloader, ModelService
+            # Save a copy of the config in the results directory
+            # for Git tracking
+            import shutil
 
-            # Map "org/name" to "name" for the directory
-            model_folder_name = self.model_id.split("/")[-1]
-            local_dir = model_settings.hf_models_dir / model_folder_name
+            results_lora_dir = "results/lora"
+            os.makedirs(results_lora_dir, exist_ok=True)
+            dest_config = os.path.join(
+                results_lora_dir, f"{experiment_label}_config.yaml"
+            )
+            shutil.copy2(config_path, dest_config)
+            print(f"[✓] Configuration trace saved to: {dest_config}")
 
+        except subprocess.CalledProcessError as e:
             print(
-                f"[!] Attempting to download full snapshot for \
-                {self.model_id}..."
+                f"[!] Subprocess training FAILED for "
+                f"'{experiment_label}' (Exit code: {e.returncode})"
             )
-            model_service = ModelService(ModelDownloader())
-
-            snapshot_path = model_service.ensure_hf_snapshot(
-                repo_id=self.model_id,
-                target_dir=local_dir,
-                allow_patterns=[
-                    "*.safetensors",
-                    "model.safetensors.index.json",
-                    "config.json",
-                    "tokenizer.json",
-                    "tokenizer_config.json",
-                ],
-            )
-
-            if snapshot_path:
-                args.model = snapshot_path
-                print(
-                    f"[+] Retrying training with local snapshot at \
-                    {snapshot_path}..."
-                )
-                lora.run(args)
-                print(
-                    f"[✓] Completed after fallback: \
-                    {self.model_id} ({experiment_label})"
-                )
-                return
-
-            print(traceback.format_exc())
         except Exception as e:
-            print(f"[!] Error in experiment '{experiment_label}': {e}")
-            print(traceback.format_exc())
-            # We don't raise here to allow
-            # other experiments in the loop to continue
+            print(f"[!] Error launching training subprocess: {e}")
         finally:
-            # Crucial: clear Metal cache after each run
-            # to free memory for Optuna/next trial
-            print("[Memory] Clearing Metal cache...")
-            mx.metal.clear_cache()
+            # Cleanup temp config
+            if os.path.exists(config_path):
+                os.remove(config_path)
+            mx.clear_cache()
+            gc.collect()
