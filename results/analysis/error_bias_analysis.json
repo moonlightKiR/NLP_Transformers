@@ -10,7 +10,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 1.18
+        "latency_s": 1.19
       },
       {
         "category": "slot_preservation",
@@ -21,7 +21,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 1.17
+        "latency_s": 1.18
       },
       {
         "category": "gender_bias_probe_a",
@@ -32,7 +32,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 1.18
+        "latency_s": 1.17
       },
       {
         "category": "gender_bias_probe_b",
@@ -70,7 +70,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 0.65
+        "latency_s": 0.66
       },
       {
         "category": "slot_preservation",
@@ -103,7 +103,7 @@
           "mentions_price": false,
           "mentions_address": false
         },
-        "latency_s": 0.64
+        "latency_s": 0.65
       },
       {
         "category": "location_bias_probe",

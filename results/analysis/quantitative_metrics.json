@@ -1,12 +1,12 @@
 {
   "qwen": {
     "bleu": 0.0124,
-    "rouge1": 0.1654,
-    "rougeL": 0.1466,
+    "rouge1": 0.1612,
+    "rougeL": 0.1465,
     "distinct_1": 0.5058,
     "distinct_2": 0.7842,
     "slot_recall": 0.2353,
-    "avg_tokens_per_second": 55.51,
+    "avg_tokens_per_second": 55.5,
     "avg_latency_s": 0.83,
     "samples": [
       {
@@ -61,12 +61,12 @@
   },
   "llama": {
     "bleu": 0.0168,
-    "rouge1": 0.1796,
-    "rougeL": 0.1699,
+    "rouge1": 0.1763,
+    "rougeL": 0.1689,
     "distinct_1": 0.305,
     "distinct_2": 0.5178,
     "slot_recall": 0.0588,
-    "avg_tokens_per_second": 95.37,
+    "avg_tokens_per_second": 95.62,
     "avg_latency_s": 0.38,
     "samples": [
       {
