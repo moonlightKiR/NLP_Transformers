@@ -3,7 +3,7 @@ import os
 import optuna
 
 from app.converters.mlx_data import MLXDataConverter
-from app.models.trainer_mlx import MLXTrainerService
+from app.models.trainer_factory import TrainerFactory
 from app.training.config import training_settings
 
 
@@ -79,8 +79,12 @@ def run_lora_challenge_phase():
     converter.ensure_train_valid()
 
     # 2. Final Training with Optimized Parameters
-    qwen_trainer = MLXTrainerService(training_settings.qwen_config["model"])
-    llama_trainer = MLXTrainerService(training_settings.llama_config["model"])
+    qwen_trainer = TrainerFactory.get_trainer(
+        training_settings.qwen_config["model"]
+    )
+    llama_trainer = TrainerFactory.get_trainer(
+        training_settings.llama_config["model"]
+    )
     qwen_final_config = _load_best_optuna_params(
         "qwen", training_settings.qwen_config
     )

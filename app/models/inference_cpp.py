@@ -4,6 +4,7 @@ from llama_cpp import Llama
 
 from app.config import settings
 from app.converters.dialogue_format import ChatTemplateService
+from app.utils.hardware import HardwareDetector
 
 
 class InferenceCPPService:
@@ -22,17 +23,32 @@ class InferenceCPPService:
 
     def load_resources(self):
         """Loads the GGUF model into memory using Llama-cpp."""
+        device_type = HardwareDetector.get_device_type()
+
+        # Map device type to descriptive backend string
+        backend_map = {
+            "mlx": "Metal/MPS (Apple Silicon)",
+            "mps": "Metal/MPS",
+            "cuda": "CUDA (NVIDIA GPU)",
+            "cpu": "CPU",
+        }
+        backend_str = backend_map.get(device_type, "CPU")
+
         print(
             f"[+] Loading GGUF model {self.model_label} \
-            (Backend: Metal/MPS)..."
+            (Backend: {backend_str})..."
         )
+
+        # n_gpu_layers=-1 attempts to use GPU for all layers
         self.model = Llama(
             model_path=str(self.model_path),
-            n_gpu_layers=-1,
+            n_gpu_layers=-1 if device_type != "cpu" else 0,
             n_ctx=2048,
             verbose=False,
         )
-        print(f"[✓] {self.model_label} loaded successfully on Mac GPU.")
+
+        device_name = "GPU" if device_type != "cpu" else "CPU"
+        print(f"[✓] {self.model_label} loaded successfully on {device_name}.")
 
     def generate_response(self, messages, max_new_tokens=128, temperature=0.7):
         """Generates a response using explicit chat templates

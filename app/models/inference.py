@@ -3,6 +3,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from app.config import settings
 from app.converters.templates import CHAT_TEMPLATES
+from app.utils.hardware import HardwareDetector
 
 
 class InferenceService:
@@ -15,11 +16,15 @@ class InferenceService:
         self.model_label = model_label
         self.model = None
         self.tokenizer = None
-        self.device = (
-            torch.device("mps")
-            if torch.backends.mps.is_available()
-            else torch.device("cpu")
-        )
+
+        # Detect device using HardwareDetector
+        device_type = HardwareDetector.get_device_type()
+        if device_type == "cuda":
+            self.device = torch.device("cuda")
+        elif device_type == "mps" or device_type == "mlx":
+            self.device = torch.device("mps")
+        else:
+            self.device = torch.device("cpu")
 
     def load_resources(self):
         """Loads the tokenizer and the GGUF model into memory."""
