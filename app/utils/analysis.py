@@ -1,22 +1,32 @@
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
 import evaluate
-import matplotlib.pyplot as plt
-import torch
-from captum.attr import IntegratedGradients
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from app.config import settings
-from app.models.config import model_settings
-from app.models.constants import (
+# Ensure a non-interactive matplotlib backend in headless/script environments
+_mplbackend = os.environ.get("MPLBACKEND", "")
+if _mplbackend.startswith("module://matplotlib_inline") or not _mplbackend:
+    os.environ["MPLBACKEND"] = "agg"
+
+import matplotlib  # noqa: E402
+
+matplotlib.use(os.environ.get("MPLBACKEND"))
+import matplotlib.pyplot as plt  # noqa: E402
+import torch  # noqa: E402
+from captum.attr import IntegratedGradients  # noqa: E402
+from transformers import AutoModelForCausalLM, AutoTokenizer  # noqa: E402
+
+from app.config import settings  # noqa: E402
+from app.models.config import model_settings  # noqa: E402
+from app.models.constants import (  # noqa: E402
     LLAMA_GGUF_NAME,
     LLAMA_TRAIN_ID,
     QWEN_GGUF_NAME,
     QWEN_TRAIN_ID,
 )
-from app.models.inference_cpp import InferenceCPPService
+from app.models.inference_cpp import InferenceCPPService  # noqa: E402
 
 
 @dataclass

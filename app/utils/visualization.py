@@ -1,11 +1,20 @@
 import os
 import sqlite3
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+# Ensure a non-interactive matplotlib backend in headless/script environments
+# (e.g., Colab notebooks run as scripts)
+_mplbackend = os.environ.get("MPLBACKEND", "")
+if _mplbackend.startswith("module://matplotlib_inline") or not _mplbackend:
+    os.environ["MPLBACKEND"] = "agg"
+
+import matplotlib  # noqa: E402
+
+matplotlib.use(os.environ.get("MPLBACKEND"))
+import matplotlib.pyplot as plt  # noqa: E402
+import pandas as pd  # noqa: E402
+import seaborn as sns  # noqa: E402
+import torch  # noqa: E402
+from transformers import AutoModelForCausalLM, AutoTokenizer  # noqa: E402
 
 
 class Visualizer:
