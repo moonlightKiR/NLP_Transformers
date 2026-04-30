@@ -16,7 +16,7 @@ Para la comparativa, se han seleccionado dos arquitecturas de vanguardia que ofr
         \item \textit{GGUF:} \texttt{Qwen3.5-2B-Q4\_K\_M.gguf} (Unsloth)
     \end{itemize}
     
-    \item \textbf{Llama 3.2-1B-Instruct (Meta):} Modelo de 1 billón de parámetros optimizado para tareas de diálogo y razonamiento ligero en dispositivos locales.
+    \item \textbf{Llama 3.2-1B-Instruct (Meta):} Modelo de 1 billón de parámetros optimizado para tareas de diálogo. Al ser un modelo \textbf{Gated}, su descarga requiere la aceptación de los términos de Meta y el uso de un token de autenticación.
     \begin{itemize}
         \item \textit{Source:} \href{https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct}{meta-llama/Llama-3.2-1B-Instruct}
         \item \textit{GGUF:} \texttt{Llama-3.2-1B-Instruct-Q4\_K\_M.gguf} (Unsloth)
@@ -24,9 +24,9 @@ Para la comparativa, se han seleccionado dos arquitecturas de vanguardia que ofr
 \end{itemize}
 
 \subsection{Evolución de la Selección y Desafíos Técnicos}
-La selección final es fruto de un proceso de iteración donde se descartaron otros modelos por limitaciones de acceso y arquitectura:
+La selección final es fruto de un proceso de iteración centrado en mantener compatibilidad con Apple Silicon, estabilidad en entrenamiento y viabilidad dentro del presupuesto de memoria disponible:
 \begin{itemize}
-    \item \textbf{Llama 3.2 3B:} Se intentó integrar esta arquitectura, pero al ser un repositorio \textit{Gated}, requiere validación manual y el uso de un token de Hugging Face.
-    \item \textbf{Gemma 4 E2B-it:} Se descartó tras detectar una incompatibilidad estructural entre los pesos (\textit{safetensors}) y la implementación de la clase \texttt{Gemma} en la librería MLX.
-    \item \textbf{Qwen 3.5 4B:} Se intentó su uso, pero el consumo de memoria Metal superó los límites del hardware durante el proceso de cálculo de gradientes.
+    \item \textbf{Llama 3.2 3B:} Se consideró como alternativa intermedia, pero su mayor coste de memoria y el requisito de acceso \textit{Gated} hacían menos robusta su integración para un flujo repetible de entrenamiento local.
+    \item \textbf{Qwen 3.5 4B:} Se evaluó como candidato de mayor capacidad, pero el consumo de memoria Metal durante el cálculo de gradientes resultó excesivo para una máquina con 18GB de RAM unificada.
+    \item \textbf{Selección final:} Se priorizó la combinación \textbf{Qwen 3.5-2B + Llama 3.2-1B-Instruct} por ofrecer el mejor equilibrio entre calidad, velocidad de iteración y estabilidad del pipeline.
 \end{itemize}

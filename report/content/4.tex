@@ -6,10 +6,10 @@ Se ha realizado una comparativa entre la librería estándar \texttt{transformer
 
 \subsubsection{Limitaciones de la Librería Estándar (Transformers)}
 
-Los intentos de inferencia con la librería estándar arrojaron resultados dispares, permitiendo documentar el estado actual de soporte para GGUF:
+Los intentos de inferencia con la librería estándar arrojaron resultados dispares, permitiendo documentar el estado actual del soporte para los dos modelos efectivamente utilizados en el proyecto:
 \begin{itemize}
     \item \textbf{Qwen 3.5:} El cargador de GGUF de \texttt{transformers} no reconoce aún la arquitectura específica \texttt{qwen35}, lo que impide la carga directa de los pesos cuantizados en esta versión.
-    \item \textbf{Llama 3.2-1B:} A diferencia de versiones anteriores, este modelo demostró una **compatibilidad nativa completa**, logrando realizar la inferencia sin errores, aunque con un proceso de carga de tensores más lento que el backend especializado.
+    \item \textbf{Llama 3.2-1B:} A diferencia de versiones anteriores, este modelo demostró compatibilidad nativa suficiente para realizar inferencia sin errores críticos, aunque con un proceso de carga de tensores más lento que el backend especializado.
 \end{itemize}
 
 \subsubsection{Solución: Llama-cpp-python y Strict Templates}
@@ -37,6 +37,6 @@ Los resultados finales en hardware Apple Silicon (18GB RAM unificada) se resumen
 \subsection{Evaluación Cualitativa (Comportamiento)}
 
 \begin{itemize}
-    \item \textbf{Qwen 3.5 2B (Razonamiento):} A pesar de ser la versión de 2B, el modelo mantiene su capacidad de \textit{"Thinking Process"}, analizando la intención de reserva y detectando ambigüedades horarias (ej. "afternoon 12"). Su velocidad es sobresaliente para una experiencia interactiva.
+    \item \textbf{Qwen 3.5 2B (Razonamiento):} A pesar de su tamaño moderado, el modelo mantiene una buena capacidad para analizar la intención de reserva y detectar ambigüedades horarias. Su velocidad resulta especialmente adecuada para pruebas iterativas en local.
     \item \textbf{Llama 3.2-1B (Asistencia):} Genera respuestas proactivas y bien estructuradas, sugiriendo métodos externos para completar la reserva, demostrando una excelente alineación con instrucciones (\textit{Instruction Following}) a pesar de su reducido tamaño.
 \end{itemize}

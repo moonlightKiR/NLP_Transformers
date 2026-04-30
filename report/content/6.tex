@@ -1,44 +1,163 @@
 \section{Evaluación Avanzada}
 
-Se realiza una comparativa profunda de ambos modelos tras la fase de optimización, considerando tanto el rendimiento cuantitativo como la calidad cualitativa.
+En esta sección se analiza el rendimiento de los modelos tras la fase de optimización, utilizando tanto métricas cuantitativas extraídas del proceso de entrenamiento como herramientas de visualización técnica para validar la interpretabilidad. Además de \texttt{nlp-viz}, el proyecto incorpora un pipeline complementario \texttt{uv run nlp-analysis} para generar artefactos reproducibles de benchmark, explainability y diagnóstico de errores.
 
-\subsection{Rendimiento Cuantitativo (ROUGE/BLEU)}
+\subsection{Análisis Cuantitativo de Generación}
 
-Se han evaluado las respuestas sobre el conjunto de test de SGD utilizando métricas de fidelidad de texto:
+Durante la optimización con Optuna, se han capturado métricas clave para cada trial, almacenadas de forma persistente en las bases de datos SQLite del proyecto. Estas métricas permiten evaluar la calidad intrínseca de las respuestas generadas por Qwen 3.5 y Llama 3.2.
+
+El mecanismo de persistencia diferencia dos niveles complementarios:
+\begin{itemize}
+    \item \textbf{SQLite en \texttt{results/optuna/}:} almacena los estudios, los \textit{trials}, sus hiperparámetros y sus métricas agregadas.
+    \item \textbf{Directorios en \texttt{.adapters/}:} almacenan los pesos ajustados resultantes de cada ejecución.
+\end{itemize}
+
+Esta separación permite consultar el mejor \textit{trial} desde la base de datos sin necesidad de inspeccionar manualmente los ficheros de pesos.
 
 \begin{table}[H]
     \centering
     \begin{tabularx}{\textwidth}{|l|X|X|}
         \hline
         \textbf{Métrica}          & \textbf{Qwen 3.5 (2B)}  & \textbf{Llama 3.2 (1B)}    \\ \hline
-        ROUGE-L                  & 0.42                    & 0.36                          \\ \hline
-        BLEU                     & 0.28                    & 0.22                          \\ \hline
+        Perplexity (PPL) $\downarrow$ & 3.92                    & 4.53                          \\ \hline
+        Coherence Score $\uparrow$    & 0.88                    & 0.65                          \\ \hline
+        Lexical Diversity $\uparrow$ & 0.72                    & 0.88                          \\ \hline
     \end{tabularx}
-    \caption{Comparativa cuantitativa sobre el split de test.}
-    \label{tab:rouge_bleu}
+    \caption{Resultados cuantitativos consolidados extraídos de los mejores trials de Optuna.}
+    \label{tab:metricas_optuna_final}
 \end{table}
 
-\subsection{Evaluación mediante LLM como Juez}
-
-Para medir la coherencia y creatividad, se ha utilizado un modelo de mayor escala (ej. LLAMA-4o o Claude 3.5 Sonnet) como juez ciego para comparar las respuestas:
+Como complemento a estas métricas internas de entrenamiento, el análisis extendido calcula métricas estándar de generación sobre un subconjunto fijo del conjunto de test:
 \begin{itemize}
-    \item \textbf{Fidelidad:} Qwen 3.5 mantiene una mayor fidelidad a los nombres de servicios y APIs.
-    \item \textbf{Naturalidad:} Llama 3.2-1B es preferido por su tono conversacional más fluido y menos encorsetado.
+    \item \textbf{BLEU:} solapamiento n-grama entre la respuesta generada y la respuesta de referencia.
+    \item \textbf{ROUGE-1 / ROUGE-L:} cobertura léxica y de subsecuencias largas sobre la referencia.
+    \item \textbf{Distinct-1 / Distinct-2:} diversidad superficial del texto generado.
+    \item \textbf{Slot Recall:} recuperación heurística de información clave del contexto conversacional (fechas, reservas, dirección, precio, etc.).
 \end{itemize}
 
-\subsection{Interpretabilidad y Explicabilidad}
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+        \hline
+        \textbf{Métrica de Benchmark} & \textbf{Qwen 3.5 (2B)} & \textbf{Llama 3.2 (1B)} \\ \hline
+        BLEU $\uparrow$               & 0.0124                 & 0.0168                  \\ \hline
+        ROUGE-1 $\uparrow$            & 0.1654                 & 0.1796                  \\ \hline
+        ROUGE-L $\uparrow$            & 0.1466                 & 0.1699                  \\ \hline
+        Slot Recall $\uparrow$        & 0.2353                 & 0.0588                  \\ \hline
+        Velocidad Inferencia (t/s) $\uparrow$ & 55.51           & 95.37                   \\ \hline
+        Latencia Media (s) $\downarrow$      & 0.83            & 0.38                    \\ \hline
+    \end{tabularx}
+    \caption{Métricas de benchmark extendido generadas mediante \texttt{nlp-analysis}.}
+    \label{tab:benchmark_nlp_analysis}
+\end{table}
 
-Para cumplir con los criterios de evaluación avanzada, se ha implementado un sistema de visualización técnica mediante el comando \texttt{uv run nlp-viz}, centrado en dos vertientes:
+\begin{itemize}
+    \item \textbf{BLEU / ROUGE:} Llama 3.2-1B muestra una ligera ventaja en el solapamiento con las respuestas de referencia del dataset SGD.
+    \item \textbf{Slot Recall:} Qwen 3.5-2B demuestra una capacidad significativamente superior para extraer y mantener entidades clave (slots) del contexto conversacional.
+    \item \textbf{Eficiencia:} Llama 3.2-1B es notablemente más rápido en inferencia local GGUF, alcanzando casi 100 tokens por segundo en Apple Silicon.
+\end{itemize}
 
-\subsubsection{Análisis de Atención (Self-Attention Maps)}
-Se han generado mapas de calor (\textit{heatmaps}) de los pesos de auto-atención de la última capa de los modelos. Al analizar frases de reserva (\textit{e.g., "Reserve a table for 2 at PF Changs..."}), se observa una alta activación en los tokens semánticos clave como \textit{"2"} (cantidad), \textit{"PF Changs"} (entidad) y \textit{"tomorrow"} (parámetro temporal). Esto valida empíricamente que la arquitectura Transformer, tras el ajuste fino, está ponderando correctamente la información relevante del dataset SGD.
+\subsection{Eficiencia de Entrenamiento y Uso de Memoria}
 
-\subsubsection{Visualización de la Optimización (Optuna History)}
-Mediante la persistencia en SQLite, se han generado gráficas de historial de optimización. Estas visualizaciones permiten observar la trayectoria de convergencia del objetivo (combinación de Perplexity y Diversidad), confirmando la utilidad de la búsqueda sistemática frente a la sintonización manual de hiperparámetros.
+Un aspecto diferencial de esta evaluación es el análisis del rendimiento del hardware Apple Silicon (18GB RAM). Se ha monitorizado el impacto de las optimizaciones de memoria en el ciclo de entrenamiento.
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+        \hline
+        \textbf{Métrica de Eficiencia} & \textbf{Qwen 3.5 (2B)} & \textbf{Llama 3.2 (1B)} \\ \hline
+        Consumo Pico de RAM (Metal)    & ~13.5 GB               & ~11.2 GB                \\ \hline
+        Velocidad de Entrenamiento     & ~18.5 tokens/sec       & ~24.2 tokens/sec        \\ \hline
+        Tiempo total (40 iters)        & ~45s                   & ~32s                    \\ \hline
+    \end{tabularx}
+    \caption{Eficiencia computacional durante el proceso de Fine-Tuning LoRA.}
+    \label{tab:eficiencia_memoria}
+\end{table}
+
+El uso de \textbf{ejecución aislada mediante subprocesos} ha permitido mantener la estabilidad del sistema durante barridos de Optuna de larga duración. Al liberar la caché de Metal completamente después de cada trial, se ha evitado la degradación del rendimiento, manteniendo una velocidad constante de procesamiento a pesar de las limitaciones de la memoria unificada de 18GB.
+
+\subsection{Análisis de Errores y Lecciones Aprendidas}
+
+El desarrollo de este proyecto ha implicado superar diversos desafíos técnicos, cuya resolución ha sido fundamental para alcanzar la estabilidad actual del sistema.
+
+\begin{itemize}
+    \item \textbf{Gestión de Memoria en Metal (OOM):} Durante las fases iniciales de optimización, se detectaron errores de \textit{Insufficient Memory} (Buffer Error 00000008). El análisis reveló que MLX no liberaba completamente la caché entre experimentos. La solución final fue la implementación de un sistema de subprocesos aislados, garantizando un estado de memoria limpio para cada ensayo.
+    \item \textbf{Evolución de Librerías (KeyError: scale):} Se experimentaron fallos en el pipeline debido a cambios en la API de \texttt{mlx-lm}, donde el parámetro \texttt{alpha} fue sustituido por \texttt{scale}. Esto subrayó la necesidad de utilizar archivos de configuración YAML estables frente a argumentos de línea de comandos.
+    \item \textbf{Truncado de Secuencias Largas:} MLX avisó de que algunas conversaciones excedían \texttt{max\_seq\_length=320} y eran truncadas. La solución adoptada fue aplicar \textit{pre-splitting} durante la conversión a JSONL, reduciendo el truncado dinámico y mejorando el uso de memoria.
+    \item \textbf{Transición de Modelos (Phi-4 a Llama 3.2):} Inicialmente se consideró el modelo Phi-4-mini, pero se optó por Llama 3.2-1B debido a su mejor integración con plantillas de chat estrictas y su mayor eficiencia en formatos cuantizados GGUF para hardware Apple.
+\end{itemize}
+
+Se ha implementado una suite de visualización (\texttt{nlp-viz}) y un pipeline de análisis adicional (\texttt{nlp-analysis}) para profundizar en el comportamiento interno de los modelos.
+
+\subsubsection{Mapas de Auto-Atención (Self-Attention Maps)}
+
+Se han generado mapas de calor para visualizar cómo los pesos de atención se distribuyen sobre los tokens de entrada. Al procesar prompts de reserva, se observa que ambos modelos activan correctamente las capas superiores sobre entidades clave (nombres de restaurantes) y parámetros temporales, validando la eficacia del ajuste fino.
 
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=0.7\textwidth]{report/plots/attention_qwen.png}
-    \caption{Ejemplo conceptual de visualización de atención generada por el sistema.}
-    \label{fig:attention_map}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/attention_qwen.png}
+        \caption{Mapa de atención - Qwen 3.5}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/attention_llama.png}
+        \caption{Mapa de atención - Llama 3.2}
+    \end{minipage}
+    \caption{Distribución de pesos de atención en una frase de reserva para ambos modelos.}
+    \label{fig:attention_maps}
 \end{figure}
+
+\subsubsection{Integrated Gradients sobre Tokens}
+
+Para complementar los mapas de atención, se incorporó una explicación basada en \textbf{Integrated Gradients} utilizando la librería Captum sobre modelos cargados con \texttt{transformers}. Esta técnica atribuye la predicción del siguiente token a los embeddings de entrada, permitiendo identificar qué palabras del prompt concentran mayor influencia en la generación.
+
+El pipeline guarda tanto un informe estructurado en \texttt{results/analysis/integrated\_gradients.json} como una visualización en barras en \texttt{report/plots/integrated\_gradients\_<model>.png}. De este modo, la explicabilidad no queda limitada a una inspección visual del mecanismo de atención, sino que también se cuantifica la contribución de cada token.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/integrated_gradients_qwen.png}
+        \caption{Integrated Gradients - Qwen 3.5}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/integrated_gradients_llama.png}
+        \caption{Integrated Gradients - Llama 3.2}
+    \end{minipage}
+    \caption{Atribución de importancia de tokens mediante Integrated Gradients.}
+    \label{fig:integrated_gradients}
+\end{figure}
+
+\subsubsection{Historial de Optimización}
+
+La persistencia de datos en \texttt{results/optuna/} permite visualizar la trayectoria de búsqueda de los mejores hiperparámetros, contrastando la evolución de la función objetivo frente al número de ensayos realizados.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/optuna_qwen_history.png}
+        \caption{Historial Optuna - Qwen 3.5}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/optuna_llama_history.png}
+        \caption{Historial Optuna - Llama 3.2}
+    \end{minipage}
+    \caption{Trayectorias de optimización para ambos modelos (PPL vs Trial).}
+    \label{fig:optuna_history}
+\end{figure}
+
+\subsection{Análisis de Errores y Posibles Sesgos}
+
+Se definió un conjunto pequeño pero reproducible de \textit{prompts} diagnósticos para inspeccionar tres familias de fallos:
+\begin{itemize}
+    \item \textbf{Resolución de ambigüedades:} capacidad para pedir aclaraciones cuando el usuario proporciona tiempos ambiguos.
+    \item \textbf{Preservación de slots:} mantenimiento de restricciones relevantes como fechas, número de habitaciones o presupuesto.
+    \item \textbf{Sesgos superficiales:} comparación de respuestas ante prompts equivalentes con cambios de nombre o contexto social para detectar asimetrías evidentes.
+\end{itemize}
+
+Los resultados se guardan en \texttt{results/analysis/error\_bias\_analysis.json}, incluyendo las respuestas generadas y un pequeño conjunto de indicadores heurísticos (por ejemplo, si el modelo solicita aclaración, menciona la hora, conserva referencias de precio o introduce detalles no solicitados). Esta metodología no reemplaza una auditoría ética exhaustiva, pero sí ofrece un punto de partida reproducible para documentar comportamientos problemáticos.

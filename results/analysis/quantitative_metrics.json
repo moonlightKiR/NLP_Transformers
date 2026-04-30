@@ -1,0 +1,122 @@
+{
+  "qwen": {
+    "bleu": 0.0124,
+    "rouge1": 0.1654,
+    "rougeL": 0.1466,
+    "distinct_1": 0.5058,
+    "distinct_2": 0.7842,
+    "slot_recall": 0.2353,
+    "avg_tokens_per_second": 55.51,
+    "avg_latency_s": 0.83,
+    "samples": [
+      {
+        "reference": "I don't mind, even a bit.",
+        "prediction": "No problem! If you decide to check it out later, feel free to reach out.\n\nIf you need help with anything else—like finding a place in a different city, comparing options, or understanding the rental process—just let me know."
+      },
+      {
+        "reference": "Happy to help!Bye",
+        "prediction": "That sounds great! Since you're in Philadelphia, you'll likely want to explore the city's iconic spots like the Liberty Bell, the Philadelphia Museum of Art, or the famous cheesesteak scene.\n\nJust to make sure I can help you further, do you have a specific date range in mind for your trip, or are you looking for a particular type of accommodation (like a historic house, a modern loft, or something near the river)?"
+      },
+      {
+        "reference": "You're welcome. Please enjoy the rest of your day.",
+        "prediction": "You're welcome! If you need any more help with your London rental search or have other questions, feel free to ask. Safe travels!"
+      },
+      {
+        "reference": "I am happy to help you. Bye.",
+        "prediction": "No problem at all! It sounds like you've found exactly what you were looking for.\n\nIf you decide you want to stay there later, feel free to reach out, or if you need help with anything else, I'm here to help. Enjoy your trip to Paris!"
+      },
+      {
+        "reference": "My pleasure. Goodbye!",
+        "prediction": "That sounds great! If you need any more help with your trip to Sydney—such as local tips, transport options, or recommendations for nearby attractions—feel free to ask. Safe travels!"
+      },
+      {
+        "reference": "You are welcome!",
+        "prediction": "No problem! If you need help finding a house in New York in the future, feel free to ask, and I'll do my best to assist you."
+      },
+      {
+        "reference": "I'm happy I could help, have a nice day.",
+        "prediction": "That sounds great! I hope you have a wonderful stay in Chi-town. If you need any more help with your trip—like finding local attractions, restaurants, or transportation tips—feel free to ask!"
+      },
+      {
+        "reference": "I am glad I could help. Have a nice day!",
+        "prediction": "You're very welcome! I hope you have a wonderful time in Paris. Safe travels!"
+      },
+      {
+        "reference": "Please confirm to book a house for 2 in Portland from March 8th to March 9th.",
+        "prediction": "Got it! You want to check in on **next Friday**.\n\nTo proceed with the booking, I need a few more details:\n1.  **Check-out date:** What day do you want to leave?\n2.  **Guests:** You mentioned \"two persons,\" but did you mean **2 guests** or **2 people** (which usually implies 2 guests)?\n3.  **Preferred arrival time:** Do you have a specific time in mind"
+      },
+      {
+        "reference": "Have a great day.",
+        "prediction": "You're welcome! Have a great day."
+      },
+      {
+        "reference": "Your booking is successfully done.",
+        "prediction": "Great! I've confirmed your booking details:\n\n*   **Location:** Atlanta, GA\n*   **Address:** 1065 Peachtree Street Northeast\n*   **Dates:** March 10th – March 12th\n*   **Guests:** 1 person\n\nYou can proceed with booking this house through the platform where you found it. If you need any further assistance, such as understanding the amenities or getting a confirmation email, feel free"
+      },
+      {
+        "reference": "It's my honor to help you.",
+        "prediction": "You're welcome! If you ever need assistance with anything else, feel free to ask. Have a great day! 😊"
+      }
+    ]
+  },
+  "llama": {
+    "bleu": 0.0168,
+    "rouge1": 0.1796,
+    "rougeL": 0.1699,
+    "distinct_1": 0.305,
+    "distinct_2": 0.5178,
+    "slot_recall": 0.0588,
+    "avg_tokens_per_second": 95.37,
+    "avg_latency_s": 0.38,
+    "samples": [
+      {
+        "reference": "I don't mind, even a bit.",
+        "prediction": "If you change your mind or need help with anything else, feel free to ask. Have a great day in London!"
+      },
+      {
+        "reference": "Happy to help!Bye",
+        "prediction": "You're welcome. I'm glad I could help you find a house for your trip to Philly. If you need any more assistance or have any other questions, feel free to ask. Have a great trip!"
+      },
+      {
+        "reference": "You're welcome. Please enjoy the rest of your day.",
+        "prediction": "You're welcome. I'm glad I could help you find a potential rental option in London. If you need any more assistance or have any other questions, feel free to ask. Have a great day!"
+      },
+      {
+        "reference": "I am happy to help you. Bye.",
+        "prediction": "I can suggest some alternatives if you change your mind."
+      },
+      {
+        "reference": "My pleasure. Goodbye!",
+        "prediction": "You're welcome, I'm glad I could help you find a potential house in Sydney. If you need any more assistance or have any other questions, feel free to ask. Have a great time searching for your new home in Sydney!"
+      },
+      {
+        "reference": "You are welcome!",
+        "prediction": "You're welcome. I'm glad I could help. If you need any more assistance, feel free to ask. Have a great day and good luck with your search for a house in New York!"
+      },
+      {
+        "reference": "I'm happy I could help, have a nice day.",
+        "prediction": "I'm glad I could help you find a potential place to stay in Chi-town. If you need any more assistance or have any other questions, feel free to ask. Have a great day and good luck with your search!"
+      },
+      {
+        "reference": "I am glad I could help. Have a nice day!",
+        "prediction": "It was a pleasure helping you find a house in Paris. If you need anything else in the future, don't hesitate to contact me. Have a great day and a wonderful trip to Paris!"
+      },
+      {
+        "reference": "Please confirm to book a house for 2 in Portland from March 8th to March 9th.",
+        "prediction": "I'm sorry I can't provide you with the house's availability. However, I can suggest that you can try searching for the house on websites like Booking.com, Expedia, or HomeAway, which allow you to filter search results by check-in and check-out dates."
+      },
+      {
+        "reference": "Have a great day.",
+        "prediction": "It was a pleasure assisting you. Have a great day!"
+      },
+      {
+        "reference": "Your booking is successfully done.",
+        "prediction": "I'm glad I could assist you with finding a suitable house in Atlanta. If you need any more help or have any other questions, feel free to ask.\n\nBy the way, I'm glad I could help you find a great place to stay. I hope you have a wonderful time in Atlanta and enjoy your stay at the house I recommended. If you need anything else, don't hesitate to ask."
+      },
+      {
+        "reference": "It's my honor to help you.",
+        "prediction": "It was a pleasure assisting you. Have a great day!"
+      }
+    ]
+  }
+}

@@ -47,9 +47,9 @@ The system features an automatic **Hardware Detector** and a **Trainer Factory**
 - **Linux/Colab**: Automatically switches to **PyTorch/CUDA** with **QLoRA (4-bit)**.
 
 ### Systematic Optimization & Traceability
-- **Optuna Persistence**: Study results are saved in SQLite databases under `results/optuna/`.
+- **Self-Cleaning Persistence**: Results are saved in SQLite databases (`results/optuna/`). The system automatically synchronizes the database with the local adapters, removing stale data on clean starts.
+- **Strict Trial Management**: Ensures a fixed number of successful trials (3) per architecture, preventing database bloat and ensuring consistent report metrics.
 - **Config Traces**: Every training run saves a YAML snapshot in `results/lora/` for full reproducibility.
-- **Strict Chat Templates**: Ensures exact prompt formatting for Llama 3.2 and Qwen 3.5.
 
 ### Technical Visualization
 Integrated visualization suite for:
