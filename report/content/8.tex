@@ -24,3 +24,65 @@ Siguiendo los principios \textbf{SOLID}, la instanciación de los motores de ent
 \subsection{Impacto en el Ciclo de Desarrollo}
 
 Esta mejora permite un flujo de trabajo híbrido donde la estructuración y pruebas rápidas se realizan en hardware local (Mac), mientras que los barridos de optimización masivos pueden lanzarse en infraestructuras \textit{cloud} sin necesidad de refactorizar el núcleo del software, demostrando una alta escalabilidad y madurez en el diseño de la solución.
+
+\section{Artefactos, Datos y Reproducibilidad}
+
+\subsection{Estructura de Artefactos Generados}
+
+El proyecto mantiene una jerarquía clara de resultados experimentales, facilitando la trazabilidad y reproducibilidad de cada fase:
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+        \hline
+        \textbf{Categoría} & \textbf{Ubicación} & \textbf{Contenido} \\ \hline
+        Logs de Ejecución & \texttt{results/logs/} & Trazas detalladas de cada comando ejecutado \\ \hline
+        Datos de Optimización & \texttt{results/optuna/} & Bases de datos SQLite con estudios y trials \\ \hline
+        Configuraciones LoRA & \texttt{results/lora/} & YAML con parámetros efectivos de cada entrenamiento \\ \hline
+        Pesos Entrenados & \texttt{.adapters/<model>/} & Adaptadores LoRA en formato \texttt{safetensors} \\ \hline
+        Análisis Cuantitativo & \texttt{results/analysis/} & JSON con métricas de eficiencia e Integrated Gradients \\ \hline
+        Visualizaciones & \texttt{report/plots/} & PNG con mapas de atención, Optuna, Integrated Gradients \\ \hline
+    \end{tabularx}
+    \caption{Estructura jerárquica de artefactos generados durante el pipeline.}
+    \label{tab:artefactos_generados}
+\end{table}
+
+\subsection{Acceso a Datos Experimentales}
+
+Los siguientes archivos contienen la información completa para reproducción y análisis posterior:
+
+\begin{itemize}
+    \item \textbf{Bases de datos Optuna (\texttt{results/optuna/*.db}):} Contienen los estudios SQLite con todos los trials ejecutados, incluyendo hiperparámetros propuestos (learning rate, rank), función objetivo y métricas de evaluación (perplexity, coherence, lexical diversity).
+    \item \textbf{Configuraciones YAML (\texttt{results/lora/*.yaml}):} Guardan los parámetros efectivos utilizados en cada trial y en el entrenamiento LoRA final, permitiendo reproducir exactamente cada ejecución.
+    \item \textbf{\texttt{results/analysis/integrated\_gradients.json}:} Datos de atribución de importancia de tokens calculados mediante la técnica Integrated Gradients, permitiendo auditar qué palabras de entrada influyen más en la predicción.
+    \item \textbf{\texttt{results/analysis/error\_bias\_analysis.json}:} Muestras de entradas y salidas junto con indicadores heurísticos de comportamientos anómalos detectados (resolución de ambigüedades, preservación de contexto, etc.).
+\end{itemize}
+
+\subsection{Conclusiones y Hallazgos Principales}
+
+\subsubsection{Rendimiento Comparativo}
+
+\begin{itemize}
+    \item \textbf{Qwen 3.5-2B:} Demuestra una mejor adaptabilidad al dominio de diálogos de reservas, con una perplexidad más baja (3.83), indicando mayor confianza en sus predicciones sobre el dataset SGD. Mantiene coherencia similar (0.50) pero con mayor diversidad léxica (0.88).
+    \item \textbf{Llama 3.2-1B:} Ofrece un balance óptimo entre eficiencia computacional y velocidad de generación, logrando 1.7x más throughput (99.95 t/s) que Qwen. Aunque su perplexidad es mayor (4.65), es adecuado para despliegues con restricciones de latencia.
+\end{itemize}
+
+\subsubsection{Impacto de LoRA en Hardware Limitado}
+
+El uso de adaptadores LoRA permitió entrenar modelos de 1-2B parámetros en una máquina con 18GB RAM sin degradación de estabilidad. La técnica de aislamiento mediante subprocesos durante Optuna fue fundamental para evitar fragmentación de memoria y garantizar reproducibilidad en múltiples trials.
+
+\subsubsection{Escalabilidad Demostrada}
+
+La arquitectura agnóstica de hardware permite que el mismo pipeline se ejecute en:
+\begin{itemize}
+    \item \textbf{Apple Silicon (M1/M2/M3):} Usando MLX para máxima eficiencia de memoria unificada.
+    \item \textbf{NVIDIA CUDA:} Usando PyTorch + PEFT con QLoRA de 4 bits para entornos cloud.
+\end{itemize}
+
+Sin refactorización del código, el pipeline puede escalar desde pruebas locales de 18GB a entrenamientos distribuidos en múltiples GPUs en infraestructura cloud.
+
+\subsubsection{Reproducibilidad}
+
+Todos los experimentos fueron registrados el \textbf{30 de abril de 2026} entre las \textbf{19:19 y 20:37}. Los logs, configuraciones YAML y bases de datos SQLite permiten reproducir cada trial exacto. El symlink de \texttt{report/results} facilita el acceso a todos los artefactos desde el contexto de compilación LaTeX.
+
