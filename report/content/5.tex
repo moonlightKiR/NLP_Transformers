@@ -33,7 +33,7 @@ Cada arquitectura mantiene su propio estudio de Optuna en una base de datos SQLi
 
 En estas bases de datos no se almacenan directamente los pesos del modelo, sino la información experimental de cada \textit{trial}: número de ensayo, estado (\texttt{COMPLETE}/\texttt{FAIL}), hiperparámetros propuestos, valor objetivo y métricas auxiliares. En concreto, el estudio persiste los parámetros \texttt{learning\_rate} y \texttt{rank}, así como atributos de usuario con \textit{perplexity}, \textit{coherence} y \textit{lexical diversity}. El criterio de selección del mejor \textit{trial} corresponde al mínimo de la función objetivo:
 \[
-\text{objective} = \text{perplexity} - 2 \cdot \text{lexical diversity}
+\mathrm{objective} = \mathrm{perplexity} - 2 \cdot \mathrm{lexical\ diversity}
 \]
 
 Por separado, los pesos resultantes de cada ensayo se guardan en carpetas específicas por modelo y por trial dentro de \texttt{.adapters/<model>/optuna/}. Esta separación evita sobrescrituras y permite auditar qué ejecución produjo cada \texttt{adapters.safetensors}.
