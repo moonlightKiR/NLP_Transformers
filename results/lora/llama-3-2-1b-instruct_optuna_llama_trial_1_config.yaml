@@ -1,15 +1,15 @@
-adapter_path: .adapters/Qwen3.5-2B/optuna/optuna_qwen_trial_2
+adapter_path: .adapters/Llama-3.2-1B-Instruct/optuna/optuna_llama_trial_1
 batch_size: 1
 data: /Users/guille/Documents/LASALLE/MASTER/DeepLearning/NLP_Transformers/.data/structured
 grad_checkpoint: true
 iters: 40
-learning_rate: 2.451446570656178e-05
+learning_rate: 1.954414511730662e-05
 lora_parameters:
   dropout: 0.0
   rank: 16
   scale: 32.0
-max_seq_length: 384
-model: Qwen/Qwen3.5-2B
+max_seq_length: 320
+model: meta-llama/Llama-3.2-1B-Instruct
 num_layers: 16
 save_every: 100
 steps_per_eval: 200
