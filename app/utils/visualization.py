@@ -26,8 +26,12 @@ class Visualizer:
         # Connect to Optuna DB and extract trial data
         conn = sqlite3.connect(db_path)
         query = (
-            "SELECT trial_id, value, datetime_start, datetime_complete "
-            "FROM trials WHERE state='COMPLETE'"
+            "SELECT t.trial_id, t.number, tv.value, "
+            "t.datetime_start, t.datetime_complete "
+            "FROM trials t "
+            "JOIN trial_values tv ON tv.trial_id = t.trial_id "
+            "WHERE t.state = 'COMPLETE' AND tv.objective = 0 "
+            "ORDER BY t.number"
         )
         df = pd.read_sql_query(query, conn)
         conn.close()
@@ -38,7 +42,7 @@ class Visualizer:
 
         # Simple Optimization History Plot
         plt.figure(figsize=(10, 6))
-        sns.lineplot(data=df, x=df.index, y="value", marker="o")
+        sns.lineplot(data=df, x="number", y="value", marker="o")
         plt.title(f"Optimization History: {model_label.upper()}")
         plt.xlabel("Trial Number")
         plt.ylabel("Objective Value (Lower is Better)")
@@ -69,19 +73,41 @@ class Visualizer:
             model = AutoModelForCausalLM.from_pretrained(
                 model_id,
                 output_attentions=True,
-                torch_dtype=torch.float16,
+                dtype=torch.float16,
                 low_cpu_mem_usage=True,
                 device_map="auto",
+                attn_implementation="eager",
+                trust_remote_code=True,
             )
+            model.config.output_attentions = True
 
             inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-            outputs = model(**inputs)
+            outputs = model(
+                **inputs,
+                output_attentions=True,
+                return_dict=True,
+            )
+
+            if outputs.attentions is None or not outputs.attentions:
+                print(
+                    "[!] Attention tensors are not available for this model "
+                    "configuration. Skipping attention map."
+                )
+                return
 
             # Extract attentions
             # (tuple of layers, each [batch, heads, seq, seq])
             # We take the last layer and the average of all heads
+            # We cast to float32
+            # because numpy/matplotlib
+            # don't support bfloat16
             attention = (
-                outputs.attentions[-1][0].mean(dim=0).detach().cpu().numpy()
+                outputs.attentions[-1][0]
+                .mean(dim=0)
+                .detach()
+                .cpu()
+                .to(torch.float32)
+                .numpy()
             )
 
             tokens = tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
@@ -117,15 +143,23 @@ def run_visualizations():
 
     # 2. Attention Visualization (Sample)
     sample_prompt = "Reserve a table for 2 at PF Changs tomorrow at 6pm."
-    # We use Qwen for the sample
-    # as it's typically lighter to load for this task
+
     from app.models.config import model_settings
 
+    # Qwen Attention Map
     viz.visualize_attention(
         model_id="Qwen/Qwen3.5-2B",
         prompt=sample_prompt,
         tokenizer_path=str(model_settings.qwen_tok_path),
         output_path="report/plots/attention_qwen.png",
+    )
+
+    # Llama Attention Map
+    viz.visualize_attention(
+        model_id="meta-llama/Llama-3.2-1B-Instruct",
+        prompt=sample_prompt,
+        tokenizer_path=str(model_settings.llama_tok_path),
+        output_path="report/plots/attention_llama.png",
     )
 
 

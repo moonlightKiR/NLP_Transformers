@@ -1,0 +1,86 @@
+{
+  "qwen": [
+    {
+      "token": "Ġ",
+      "score": -1027.344482
+    },
+    {
+      "token": "Ġat",
+      "score": -337.230652
+    },
+    {
+      "token": "User",
+      "score": 237.757202
+    },
+    {
+      "token": "Ġtomorrow",
+      "score": -178.294067
+    },
+    {
+      "token": "Ċ",
+      "score": 160.705734
+    },
+    {
+      "token": "pm",
+      "score": -159.763107
+    },
+    {
+      "token": "Ġin",
+      "score": -155.297684
+    },
+    {
+      "token": "Ġa",
+      "score": 54.960243
+    },
+    {
+      "token": ":",
+      "score": 46.801643
+    },
+    {
+      "token": "ĠMadrid",
+      "score": -46.077293
+    }
+  ],
+  "llama": [
+    {
+      "token": "<|begin_of_text|>",
+      "score": -7.978518
+    },
+    {
+      "token": "User",
+      "score": 6.858649
+    },
+    {
+      "token": ":",
+      "score": -6.153854
+    },
+    {
+      "token": "Ġtomorrow",
+      "score": -4.766533
+    },
+    {
+      "token": "Ġ",
+      "score": -3.698352
+    },
+    {
+      "token": "Ġa",
+      "score": -3.572669
+    },
+    {
+      "token": "Ġat",
+      "score": -3.39696
+    },
+    {
+      "token": "Ġtable",
+      "score": -2.957373
+    },
+    {
+      "token": "Ġin",
+      "score": -2.185359
+    },
+    {
+      "token": "Ġtwo",
+      "score": -1.875393
+    }
+  ]
+}

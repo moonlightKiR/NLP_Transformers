@@ -4,12 +4,27 @@ Tras identificar los mejores hiperparámetros en la fase de optimización, se pr
 
 \subsection{Implementación de "Producción" con MLX}
 
-A diferencia de los ensayos rápidos de Optuna, este proceso utiliza los valores ganadores (ej. $r=8$ para Llama 3.2-1B) y se configura con un mayor número de iteraciones para maximizar la calidad de las respuestas.
+A diferencia de los ensayos rápidos de Optuna, este proceso ya no utiliza valores fijos definidos manualmente, sino que \textbf{lee automáticamente los mejores hiperparámetros persistidos en las bases de datos SQLite de Optuna}. En concreto, para cada modelo se carga el estudio correspondiente y se extraen \texttt{study.best\_params}, reutilizando los valores ganadores de \texttt{learning\_rate} y \texttt{rank} sobre una configuración base de entrenamiento final.
+
+De esta forma, \texttt{uv run nlp-train-lora} actúa como una segunda fase del pipeline experimental: Optuna explora y persiste; LoRA Final recupera el mejor resultado y lo entrena de forma más prolongada.
+
 \begin{itemize}
-    \item \textbf{Rank ($r$):} 8.
-    \item \textbf{Alpha:} 16.
-    \item \textbf{Capas Objetivo:} Proyecciones lineales en el mecanismo de atención.
+    \item \textbf{Rank ($r$):} valor óptimo recuperado desde \texttt{results/optuna/optuna\_<model>.db}.
+    \item \textbf{Scale:} ajustado en MLX como \texttt{scale = 2r}, manteniendo una relación estable entre capacidad y magnitud de la adaptación.
+    \item \textbf{Learning Rate:} valor óptimo recuperado automáticamente del mejor \textit{trial}.
+    \item \textbf{Capas Objetivo:} últimas capas lineales configuradas mediante LoRA en MLX.
+    \item \textbf{Iteraciones:} 200 iteraciones por modelo en la fase final.
 \end{itemize}
+
+\subsection{Persistencia de Artefactos Finales}
+
+La fase final genera dos tipos de artefactos:
+\begin{itemize}
+    \item \textbf{Pesos LoRA finales en \texttt{.adapters/}:} cada modelo guarda sus pesos en una carpeta independiente, por ejemplo \texttt{.adapters/Qwen3.5-2B/lora/final\_lora/} y \texttt{.adapters/Llama-3.2-1B-Instruct/lora/final\_lora/}.
+    \item \textbf{Trazas de configuración en \texttt{results/lora/}:} se almacena una copia YAML de la configuración efectiva utilizada para cada entrenamiento final.
+\end{itemize}
+
+Este diseño mantiene separada la persistencia de pesos y la persistencia de metadatos experimentales, facilitando la reproducibilidad del entrenamiento y la auditoría posterior.
 
 \subsection{Eficiencia y Resultados}
 

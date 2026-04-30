@@ -5,7 +5,7 @@ Para garantizar la reproducibilidad y facilitar el despliegue del proyecto, se h
 
 \subsubsection{Autenticación y Seguridad (.env)}
 
-Debido a que modelos de última generación requieren autenticación para su descarga, se ha integrado la librería \texttt{python-dotenv}. El sistema carga automáticamente un \texttt{HF\_TOKEN} desde un archivo \texttt{.env}, permitiendo que las librerías de Hugging Face gestionen las descargas de forma transparente.
+Debido a que modelos de última generación (especialmente la familia \textbf{Llama 3.2 de Meta}) están bajo licencias restrictivas y son repositorios \textbf{Gated}, se ha integrado la librería \texttt{python-dotenv}. El sistema carga automáticamente un \texttt{HF\_TOKEN} desde un archivo \texttt{.env}. Esta infraestructura es esencial no solo para descargar los pesos oficiales, sino también para acceder a los archivos de configuración y tokenización necesarios para el correcto funcionamiento de los \textit{Chat Templates}.
 
 \subsubsection{Arquitectura del Sistema de Ingestión}
 
@@ -16,7 +16,7 @@ Debido a que modelos de última generación requieren autenticación para su des
 
 \subsubsection{Gestión del Almacenamiento y Caché (Hugging Face Hub)}
 
-Para optimizar el uso del disco y evitar descargas redundantes de archivos de gran tamaño (9GB-10GB por modelo), el sistema utiliza el almacenamiento centralizado de \texttt{huggingface\_hub}. En el entorno de desarrollo (macOS), los modelos en formato \textit{safetensors} se gestionan automáticamente en la ruta del sistema:
+Para optimizar el uso del disco y evitar descargas redundantes de archivos de gran tamaño, el sistema utiliza el almacenamiento centralizado de \texttt{huggingface\_hub}. En el entorno de desarrollo (macOS), los modelos en formato \textit{safetensors} se gestionan automáticamente en la ruta del sistema:
 \begin{center}
     \texttt{\textasciitilde/.cache/huggingface/hub}
 \end{center}
@@ -32,7 +32,7 @@ Durante la ejecución, se ha observado y corregido el uso de parámetros obsolet
 
 \subsection{Truncado y Padding}
 
-Se aplica una estrategia de truncado dinámico de entre \textbf{384 y 512 tokens} (optimizado para la estabilidad en 18GB de RAM unificada) y \textit{padding} dinámico. Esta reducción controlada desde los 2048 tokens nativos permite la creación de tensores rectangulares eficientes para el entrenamiento, garantizando que el pipeline de gradientes no desborde la memoria Metal en procesos iterativos largos.
+Se aplica una estrategia de longitud máxima controlada, fijando \texttt{max\_seq\_length=320} para el entrenamiento LoRA y combinándola con \textit{padding} dinámico. Esta reducción respecto a las ventanas nativas de contexto permite crear tensores eficientes y mantener estable el uso de memoria Metal durante ejecuciones iterativas prolongadas.
 
 \subsection{Persistencia de Tensores}
 
@@ -40,4 +40,4 @@ El sistema guarda los resultados como archivos de tensores de PyTorch (\texttt{.
 
 \subsection{Manejo de Secuencias Largas}
 
-Para diálogos extensos, se ha implementado una estrategia de \textbf{ventana deslizante}. El sistema prioriza los turnos más recientes del diálogo, garantizando que el modelo mantenga la información relevante para generar la respuesta actual sin exceder su ventana de contexto nativa.
+Para diálogos extensos, se ha implementado una estrategia de \textbf{pre-splitting} durante la conversión a JSONL. En lugar de delegar el recorte completo al entrenador, las conversaciones largas se fragmentan en trozos contiguos más pequeños antes del ajuste fino. Esta decisión reduce truncados en tiempo de entrenamiento y mejora el aprovechamiento de memoria en Apple Silicon.

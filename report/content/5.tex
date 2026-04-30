@@ -2,13 +2,15 @@
 
 En esta fase se ha explorado la configuración óptima de los hiperparámetros mediante un enfoque de búsqueda sistemática, utilizando la librería \textbf{Optuna} a través del comando \texttt{uv run nlp-train}. Para garantizar la estabilidad del hardware (18GB RAM) y permitir múltiples ejecuciones rápidas, se ha utilizado la técnica \textbf{LoRA} como motor de entrenamiento durante todos los ensayos (\textit{trials}).
 
-\subsection{Aislamiento de Procesos y Persistencia}
+\subsection{Aislamiento de Procesos y Persistencia Autolimpiable}
 
-Un desafío técnico crítico detectado durante el barrido de Optuna fue la acumulación de fragmentos de memoria en la caché de Metal, provocando errores de \textit{Insufficient Memory} a partir del segundo ensayo. Para solventarlo, se han implementado dos mejoras de ingeniería:
+Un desafío técnico crítico detectado durante el barrido de Optuna fue la acumulación de fragmentos de memoria y de datos obsoletos. Para solventarlo, se han implementado tres mejoras de ingeniería de alto nivel:
 \begin{itemize}
-    \item \textbf{Bucle de Entrenamiento Aislado:} Cada \textit{trial} se lanza como un subproceso independiente. Esto garantiza que el sistema operativo recupere el 100\% de la memoria de la GPU al finalizar cada experimento, permitiendo que el siguiente comience con un estado "limpio".
-    \item \textbf{Persistencia vía SQLite:} Los resultados de los estudios se almacenan en una base de datos local (\texttt{optuna\_<model>.db}), permitiendo la trazabilidad y la reanudación de experimentos interrumpidos sin pérdida de datos.
+    \item \textbf{Bucle de Entrenamiento Aislado:} Cada \textit{trial} se lanza como un subproceso independiente, garantizando la recuperación total de la memoria GPU.
+    \item \textbf{Gestión de Datos Autolimpiable:} El sistema sincroniza automáticamente las bases de datos SQLite con el sistema de archivos. Si se detecta un inicio limpio (\textit{clean start}), las bases de datos obsoletas se eliminan para evitar la acumulación de ruido experimental.
+    \item \textbf{Control Estricto de Ensayos:} Se ha programado una lógica de control que asegura exactamente 3 ensayos exitosos por arquitectura, evitando el crecimiento indefinido de los archivos de resultados y garantizando la consistencia de las métricas del reporte.
 \end{itemize}
+
 
 \subsection{Metodología de Búsqueda}
 
@@ -20,6 +22,32 @@ Se ha definido un espacio de búsqueda centrado en los parámetros críticos de 
 \end{itemize}
 
 Adicionalmente, para evitar errores de \textit{out-of-memory} en MLX/Metal durante la evaluación, se limita el número de batches de validación (\texttt{val\_batches}). En esta práctica se utiliza una validación derivada del conjunto de test (20\%) como señal rápida de convergencia, manteniendo el resto del test para evaluación final.
+
+\subsection{Persistencia de Estudios y Trazabilidad}
+
+Cada arquitectura mantiene su propio estudio de Optuna en una base de datos SQLite independiente:
+\begin{itemize}
+    \item \texttt{results/optuna/optuna\_qwen.db}
+    \item \texttt{results/optuna/optuna\_llama.db}
+\end{itemize}
+
+En estas bases de datos no se almacenan directamente los pesos del modelo, sino la información experimental de cada \textit{trial}: número de ensayo, estado (\texttt{COMPLETE}/\texttt{FAIL}), hiperparámetros propuestos, valor objetivo y métricas auxiliares. En concreto, el estudio persiste los parámetros \texttt{learning\_rate} y \texttt{rank}, así como atributos de usuario con \textit{perplexity}, \textit{coherence} y \textit{lexical diversity}. El criterio de selección del mejor \textit{trial} corresponde al mínimo de la función objetivo:
+\[
+\text{objective} = \text{perplexity} - 2 \cdot \text{lexical diversity}
+\]
+
+Por separado, los pesos resultantes de cada ensayo se guardan en carpetas específicas por modelo y por trial dentro de \texttt{.adapters/<model>/optuna/}. Esta separación evita sobrescrituras y permite auditar qué ejecución produjo cada \texttt{adapters.safetensors}.
+
+\subsection{Pre-splitting de Conversaciones Largas}
+
+Durante las primeras ejecuciones se observó el aviso de MLX indicando que algunas secuencias superaban el límite de \texttt{320} tokens y eran truncadas. Aunque este comportamiento no impide el entrenamiento, sí descarta parte del contexto final y desperdicia memoria al preparar ejemplos que luego se recortan dinámicamente.
+
+Para mitigarlo se incorporó una fase de \textbf{pre-splitting} en la conversión a JSONL: las conversaciones largas se dividen de forma anticipada en fragmentos contiguos más pequeños, manteniendo un presupuesto conservador de longitud antes del entrenamiento. Con ello se consigue:
+\begin{itemize}
+    \item reducir o eliminar truncados en tiempo de entrenamiento,
+    \item mejorar el aprovechamiento de memoria en Apple Silicon,
+    \item incrementar el número efectivo de ejemplos supervisados sin perder contenido largo.
+\end{itemize}
 
 \subsection{Métricas de Generación}
 
@@ -52,7 +80,7 @@ A diferencia de la inferencia base, la optimización se ha evaluado mediante mé
     \item \textbf{Validación y test:} Se utiliza un 20\% del conjunto de test como validación para obtener una señal rápida de convergencia durante el barrido, reservando el 80\% restante para evaluación final. Esta decisión debe considerarse una limitación metodológica.
     \item \textbf{Impacto de hiperparámetros:} Los parámetros con mayor influencia suelen ser el \textit{learning rate} y el \textit{rank} de LoRA: LR alto tiende a inestabilidad/peor generalización, mientras que ranks altos aumentan capacidad de adaptación a costa de mayor coste y riesgo de sobreajuste.
     \item \textbf{Número de trials:} Un número reducido de pruebas sirve para observar tendencias, pero no garantiza un óptimo global; si se dispone de más recursos, conviene aumentar trials o refinar el rango alrededor de la mejor configuración encontrada.
-    \item \textbf{Trazabilidad:} La separación de experimentos por modelo en \texttt{.adapters/<model>/optuna} facilita comparar arquitecturas y auditar qué configuración produjo cada resultado.
+    \item \textbf{Trazabilidad:} La separación de experimentos por modelo y por trial en \texttt{.adapters/<model>/optuna/<trial>} facilita comparar arquitecturas y auditar qué configuración produjo cada resultado.
 \end{itemize}
 
 \subsection{Selección final del modelo}

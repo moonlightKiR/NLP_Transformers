@@ -28,6 +28,7 @@ app/training/constants.py
 app/training/evaluator.py
 app/training/training.py
 app/training/training_lora.py
+app/utils/analysis.py
 app/utils/hardware.py
 app/utils/visualization.py
 nlp_transformers.egg-info/PKG-INFO

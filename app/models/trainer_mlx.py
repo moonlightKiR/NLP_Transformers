@@ -37,6 +37,9 @@ class MLXTrainerService:
             # Use non-deprecated API
             mx.set_cache_limit(safe_limit * 1024 * 1024 * 1024)
 
+    def _model_slug(self) -> str:
+        return self.model_id.split("/")[-1].lower().replace(".", "-")
+
     def _prepare_config(
         self,
         custom_args: Optional[dict[str, Any]] = None,
@@ -65,7 +68,7 @@ class MLXTrainerService:
             "steps_per_eval": 200,
             "val_batches": 1,
             "save_every": 100,
-            "max_seq_length": 384,
+            "max_seq_length": 320,
             "grad_checkpoint": True,
             "num_layers": 16,
             "lora_parameters": {
@@ -81,23 +84,21 @@ class MLXTrainerService:
                 if key == "rank":
                     config["lora_parameters"]["rank"] = value
                     # Keep scale = 2.0 * rank for stability
-                    # (equivalent to alpha in other frameworks)
                     config["lora_parameters"]["scale"] = float(2 * value)
                 elif key == "scale":
                     config["lora_parameters"]["scale"] = float(value)
                 elif key == "lora_layers":
                     config["num_layers"] = value
-                elif key in config:
-                    config[key] = value
                 elif key == "adapter_path":
-                    # If adapter_path is provided
-                    # we still want to append the experiment_label
+                    # Keep each experiment isolated in its own directory.
                     if experiment_label:
                         config["adapter_path"] = os.path.join(
                             value, experiment_label
                         )
                     else:
                         config["adapter_path"] = value
+                elif key in config:
+                    config[key] = value
 
         return config
 
@@ -160,7 +161,8 @@ class MLXTrainerService:
             results_lora_dir = "results/lora"
             os.makedirs(results_lora_dir, exist_ok=True)
             dest_config = os.path.join(
-                results_lora_dir, f"{experiment_label}_config.yaml"
+                results_lora_dir,
+                f"{self._model_slug()}_{experiment_label}_config.yaml",
             )
             shutil.copy2(config_path, dest_config)
             print(f"[✓] Configuration trace saved to: {dest_config}")

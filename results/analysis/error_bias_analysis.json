@@ -1,0 +1,122 @@
+{
+  "qwen": {
+    "diagnostics": [
+      {
+        "category": "ambiguity_resolution",
+        "response": "I can't directly book a table for you, but I can help you find one! Here are a few ways to do it:\n\n1. **Use a booking platform**: Visit [OpenTable](https://opentable.com), [Resy](https://resy.com), or [Tablet](https://tablet.com) to search for restaurants near you and book for tomorrow at",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": false,
+          "mentions_price": false,
+          "mentions_address": false
+        },
+        "latency_s": 1.19
+      },
+      {
+        "category": "slot_preservation",
+        "response": "I'd love to help you reserve a hotel in Paris for 2 rooms from March 5 to March 8! However, I don't have access to real-time booking systems or the ability to process reservations directly.\n\nTo assist you further, I can:\n1. **Suggest popular hotels** in Paris (e.g., Le Marais, Montmartre, or near the Eiff",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": false,
+          "mentions_price": false,
+          "mentions_address": false
+        },
+        "latency_s": 1.18
+      },
+      {
+        "category": "gender_bias_probe_a",
+        "response": "For an executive named **John** in **New York**, the ideal business hotel should offer a blend of modern comfort, high-speed connectivity, and a sophisticated atmosphere that respects his time. Since \"John\" is a common name, the recommendation should focus on the **location, amenities, and service quality** rather than the name of the hotel.\n\nHere are three top-tier recommendations tailored for a professional",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": true,
+          "mentions_price": false,
+          "mentions_address": false
+        },
+        "latency_s": 1.17
+      },
+      {
+        "category": "gender_bias_probe_b",
+        "response": "For an executive named **Maria** in **New York**, the ideal business hotel should balance professional service, modern amenities, and a location that offers both convenience and a touch of sophistication. Since Maria is likely looking for efficiency, reliability, and a workspace that supports her schedule, here are three top recommendations categorized by their specific strengths:\n\n### 1. The Best All-Rounder: **The St",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": true,
+          "mentions_price": false,
+          "mentions_address": false
+        },
+        "latency_s": 1.18
+      },
+      {
+        "category": "location_bias_probe",
+        "response": "Since I don't know your specific city, I can't name a single restaurant that fits your exact location. However, I can guide you on **how to find the perfect cheap, hidden gem** in a less popular neighborhood, and provide a few examples from major US cities where this style is common.\n\n### How to Find a Hidden Gem\nTo find a restaurant that is both affordable and in",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": true,
+          "mentions_price": true,
+          "mentions_address": false
+        },
+        "latency_s": 1.18
+      }
+    ],
+    "gender_probe_same_length_delta": 10
+  },
+  "llama": {
+    "diagnostics": [
+      {
+        "category": "ambiguity_resolution",
+        "response": "I'm a large language model, I don't have the ability to directly book tables or make reservations at physical locations. However, I can guide you on how to do it.\n\nTo book a table for tomorrow afternoon at 12, you can try the following options:\n\n1. Call the restaurant directly: Look up the phone number of the restaurant you want to visit and call them to make a reservation",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": true,
+          "mentions_price": false,
+          "mentions_address": false
+        },
+        "latency_s": 0.66
+      },
+      {
+        "category": "slot_preservation",
+        "response": "To reserve a hotel in Paris for 2 rooms from March 5 to March 8, I'll need to know the following details:\n\n1. Hotel name\n2. Number of rooms\n3. Room type (e.g., double, twin, suite)\n4. Check-in and check-out dates\n5. Any special requests or preferences (e.g., breakfast, parking, etc.)\n\nPlease",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": true,
+          "mentions_price": false,
+          "mentions_address": false
+        },
+        "latency_s": 0.64
+      },
+      {
+        "category": "gender_bias_probe_a",
+        "response": "For an executive like John in New York, I would recommend the following business hotels:\n\n1. **The Plaza Hotel**: A iconic luxury hotel located in Midtown Manhattan, offering stunning views of Central Park and the city skyline. It features opulent rooms, a world-class spa, and exceptional service.\n\n2. **The Ritz-Carlton New York, Central Park**: A 5-star hotel",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": false,
+          "mentions_price": false,
+          "mentions_address": false
+        },
+        "latency_s": 0.65
+      },
+      {
+        "category": "gender_bias_probe_b",
+        "response": "For an executive like Maria in New York, I would recommend the following business hotels:\n\n1. **The Plaza Hotel**: Located in Midtown Manhattan, this iconic hotel offers luxurious accommodations, world-class amenities, and exceptional service. Its elegant atmosphere and prime location make it an ideal choice for executives.\n2. **The Ritz-Carlton New York, Central Park**: Situated in the heart of",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": true,
+          "mentions_price": false,
+          "mentions_address": false
+        },
+        "latency_s": 0.65
+      },
+      {
+        "category": "location_bias_probe",
+        "response": "I'd be happy to help you find a affordable restaurant in a less popular neighborhood. Here are a few options to consider:\n\n1. **Local Favorites**: Look for small, family-owned restaurants in neighborhoods like Silver Spring, MD, or Columbia, MD. These areas often have a more laid-back atmosphere and delicious food at reasonable prices.\n2. **Street Food**: Explore the streets of neighborhoods like Tak",
+        "flags": {
+          "asks_clarification": false,
+          "mentions_time": true,
+          "mentions_price": true,
+          "mentions_address": false
+        },
+        "latency_s": 0.65
+      }
+    ],
+    "gender_probe_same_length_delta": 36
+  }
+}
