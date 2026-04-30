@@ -65,6 +65,10 @@ def run_lora_challenge_phase():
     Main entry point for Section 7: LoRA Efficient Fine-Tuning.
     Executes final training with LoRA optimizations.
     """
+    from app.utils.logger import setup_logger
+
+    setup_logger("nlp-train-lora")
+
     print(
         "=== NLP Transformers: Section 7 - \
         LoRA Challenge Phase (Efficient FT) ==="

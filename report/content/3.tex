@@ -32,7 +32,7 @@ Durante la ejecución, se ha observado y corregido el uso de parámetros obsolet
 
 \subsection{Truncado y Padding}
 
-Se aplica una estrategia de longitud máxima controlada, fijando \texttt{max\_seq\_length=320} para el entrenamiento LoRA y combinándola con \textit{padding} dinámico. Esta reducción respecto a las ventanas nativas de contexto permite crear tensores eficientes y mantener estable el uso de memoria Metal durante ejecuciones iterativas prolongadas.
+Se aplica una estrategia de longitud máxima controlada, fijando \texttt{max\_seq\_length=512} para el entrenamiento LoRA y combinándola con \textit{padding} dinámico. Esta reducción respecto a las ventanas nativas de contexto permite crear tensores eficientes y mantener estable el uso de memoria Metal durante ejecuciones iterativas prolongadas.
 
 \subsection{Persistencia de Tensores}
 
