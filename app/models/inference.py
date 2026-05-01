@@ -3,6 +3,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from app.config import settings
 from app.converters.templates import CHAT_TEMPLATES
+from app.models.constants import LLAMA_TRAIN_ID, QWEN_TRAIN_ID
 from app.utils.hardware import HardwareDetector
 
 
@@ -18,16 +19,16 @@ class InferenceService:
         self.tokenizer = None
 
         # Detect device using HardwareDetector
-        device_type = HardwareDetector.get_device_type()
-        if device_type == "cuda":
+        self.device_type = HardwareDetector.get_device_type()
+        if self.device_type == "cuda":
             self.device = torch.device("cuda")
-        elif device_type == "mps" or device_type == "mlx":
+        elif self.device_type == "mps" or self.device_type == "mlx":
             self.device = torch.device("mps")
         else:
             self.device = torch.device("cpu")
 
     def load_resources(self):
-        """Loads the tokenizer and the GGUF model into memory."""
+        """Loads the tokenizer and the model into memory."""
         print(
             f"[+] Loading tokenizer for {self.model_label} \
             from: {self.tokenizer_path.name}"
@@ -48,14 +49,47 @@ class InferenceService:
                 self.model_label, CHAT_TEMPLATES["qwen"]
             )
 
-        print(f"[+] Loading GGUF model {self.model_label} on {self.device}...")
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_path.parent,
-            gguf_file=self.model_path.name,
-            device_map="auto",
-            dtype=torch.float16,
-            trust_remote_code=True,
-        )
+        # NATIVE CUDA OPTIMIZATION: Use safetensors + BitsAndBytes
+        if self.device_type == "cuda":
+            repo_id = (
+                QWEN_TRAIN_ID
+                if "qwen" in self.model_label.lower()
+                else LLAMA_TRAIN_ID
+            )
+            print(
+                f"[+] Loading native model "
+                f"{self.model_label} from {repo_id} on CUDA (4-bit)..."
+            )
+
+            from transformers import BitsAndBytesConfig
+
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_use_double_quant=True,
+            )
+
+            self.model = AutoModelForCausalLM.from_pretrained(
+                repo_id,
+                quantization_config=bnb_config,
+                device_map="auto",
+                trust_remote_code=True,
+            )
+        else:
+            # GGUF Fallback for MPS/CPU
+            print(
+                f"[+] Loading GGUF model "
+                f"{self.model_label} on {self.device}..."
+            )
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.model_path.parent,
+                gguf_file=self.model_path.name,
+                device_map="auto",
+                dtype=torch.float16,
+                trust_remote_code=True,
+            )
+
         print(f"[✓] {self.model_label} loaded successfully.")
 
     def generate_response(

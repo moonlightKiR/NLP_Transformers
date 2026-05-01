@@ -2,6 +2,7 @@ from app.models.config import model_settings
 from app.models.constants import LLAMA_GGUF_NAME, QWEN_GGUF_NAME
 from app.models.inference import InferenceService
 from app.models.inference_cpp import InferenceCPPService
+from app.utils.hardware import HardwareDetector
 
 
 class InitialInferenceService:
@@ -18,13 +19,20 @@ class InitialInferenceService:
 
     def run_comparative_inference(self):
         """Runs inference tests across different backends for documentation."""
+        device_type = HardwareDetector.get_device_type()
         print("\n=== NLP Transformers: Initial Inference ===")
 
-        # --- STEP A: Standard Transformers Library (Documenting Failure) ---
-        print(
-            "\n[STEP A] Attempting inference with\
-            Standard 'transformers' library..."
-        )
+        # --- STEP A: Standard Transformers / Native CUDA ---
+        if device_type == "cuda":
+            print(
+                "\n[STEP A] Running optimized NATIVE inference\
+                (Safetensors + CUDA 4-bit)..."
+            )
+        else:
+            print(
+                "\n[STEP A] Attempting inference with\
+                Standard 'transformers' library (GGUF Fallback)..."
+            )
 
         # Qwen Attempt
         try:
@@ -33,7 +41,10 @@ class InitialInferenceService:
             )
             qwen_trans.run_initial_test(self._processor, self._split)
         except Exception as e:
-            print(f"[!] QWEN Transformers Backend failed as expected: {e}")
+            if device_type == "cuda":
+                print(f"[!] QWEN Native Backend failed: {e}")
+            else:
+                print(f"[!] QWEN Transformers Backend failed as expected: {e}")
 
         # Llama Attempt
         try:
@@ -42,12 +53,15 @@ class InitialInferenceService:
             )
             llama_trans.run_initial_test(self._processor, self._split)
         except Exception as e:
-            print(f"[!] LLAMA Transformers Backend failed: {e}")
+            print(f"[!] LLAMA Transformers/Native Backend failed: {e}")
 
-        # --- STEP B: Llama-cpp-python (Optimized Backend) ---
+        # --- STEP B: Llama-cpp-python (GGUF Backend) ---
+        backend_name = (
+            "Metal/MPS" if device_type in ("mlx", "mps") else "CUDA/CPU"
+        )
         print(
-            "\n[STEP B] Attempting inference with 'llama-cpp-python'\
-            (Strict Templates)..."
+            f"\n[STEP B] Attempting inference with 'llama-cpp-python'\
+            ({backend_name} GGUF)..."
         )
 
         # Qwen Optimized
